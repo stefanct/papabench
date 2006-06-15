@@ -1,0 +1,7 @@
+PAPARAZZI_DIR = \"/home/casse/tmp/PapaBench\"
+ATMELBIN = /usr/bin
+ATMEL_INCLUDES = -I $(HOME)/tmp/PapaBench/avr/include/
+UISPBIN=/usr/bin
+PROG_PORT = /dev/parport0
+USB_PROG_PORT = /dev/ttyUSB1
+# WITH_RTTY=1 # If you want to support the telemetry through the audio input
