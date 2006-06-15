@@ -1,6 +1,6 @@
-PAPARAZZI_DIR = \"/home/casse/tmp/PapaBench\"
+PAPARAZZI_DIR = \"$(BASE)/\"
 ATMELBIN = /usr/bin
-ATMEL_INCLUDES = -I $(HOME)/tmp/PapaBench/avr/include/
+ATMEL_INCLUDES = -I $(BASE)/avr/include/
 UISPBIN=/usr/bin
 PROG_PORT = /dev/parport0
 USB_PROG_PORT = /dev/ttyUSB1

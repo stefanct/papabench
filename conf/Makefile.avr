@@ -26,12 +26,20 @@
 # Edit the configuration part to suit your local install
 #
 
-CC		= arm-elf-gcc
-#CC		= powerpc-linux-gnu-gcc
+# Uncomment the line matching your architecture
+#ARCH	=
+ ARCH	= powerpc-linux-gnu-
 
+# Does not yet work with the following architectures
+#ARCH	= powerpc-elf-
+#ARCH	= powerpc-eabi-
+#ARCH	= arm-elf-
+
+
+CC		= $(ARCH)gcc
 LD		= $(CC) 
-SIZE		= size
-OBJCOPY         = objcopy
+SIZE		= $(ARCH)size
+OBJCOPY         = $(ARCH)objcopy
 
 
 SERIAL_FLAGS	=							\

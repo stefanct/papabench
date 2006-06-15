@@ -18,6 +18,14 @@
 # the Free Software Foundation, 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.  
 
+PACKAGE=PapaBench
+VERSION=0.2
+RELEASE=0
+BASE=$(PWD)
+DIST= COPYING AUTHORS README Loops_Bounds.txt Makefile
+DISTDIRS=aadl_sources avr conf sw
+
+
 LIB=sw/lib
 AIRBORNE=sw/airborne
 CONFIGURATOR=sw/configurator
@@ -40,19 +48,19 @@ lib:
 	cd $(LIB)/c; $(MAKE)
 
 fbw fly_by_wire : 
-	cd $(FBW); $(MAKE) all
+	cd $(FBW); $(MAKE) BASE=$(BASE) all
 
 ap autopilot : 
-	cd $(AP); $(MAKE) all
+	cd $(AP); $(MAKE) BASE=$(BASE) all
 
 upload_fbw: fbw
-	cd $(FBW); $(MAKE) upload
+	cd $(FBW); $(MAKE) BASE=$(BASE) upload
 
 upload_ap: ap
-	cd $(AP); $(MAKE) upload
+	cd $(AP); $(MAKE) BASE=$(BASE) upload
 
 erase_fbw:
-	cd $(FBW); $(MAKE) erase
+	cd $(FBW); $(MAKE) BASE=$(BASE) erase
 
 erase_ap:
 	cd $(AP); $(MAKE) erase
@@ -66,4 +74,24 @@ doxygen:
 clean: 
 	find . -name Makefile -mindepth 2 -exec sh -c '$(MAKE) -C `dirname {}` $@' \; 
 	find . -name '*~' -exec rm -f {} \;
+
+DISTNAME=$(PACKAGE)-$(VERSION)
+ifneq ($(RELEASE),0)
+DISTNAME+=-$(RELEASE)
+endif
+
+dist: clean
+	-mkdir $(DISTNAME)
+	cp -R $(DIST) $(DISTNAME)
+	for d in $(DISTDIRS); do \
+		for f in `find $$d ! -path "*/CVS*"`; do \
+			if test -d $$f; then \
+				mkdir $(DISTNAME)/$$f; \
+			else \
+				cp $$f $(DISTNAME)/$$f; \
+			fi; \
+		done; \
+	done
+	tar cvfz $(DISTNAME).tgz $(DISTNAME)
+	rm -rf $(DISTNAME)
 
