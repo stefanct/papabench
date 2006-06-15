@@ -1,0 +1,116 @@
+
+PCG
+
+main 10009b48
+	modem_init 100067a0
+	adc_init 10006bec
+	spi_init 10006b30
+	link_fbw_init 10006910
+	gps_init 10006d0c
+	nav_init 1000901c
+	ir_init 10007174
+	estimator_init 10009380
+	periodic_task 1000492c
+	receive_gps_data_task 10004c6c
+	radio_control_task 1000302c
+
+modem_init 100067a0
+
+adc_init 10006bec
+
+spi_init 10006b30
+
+link_fbw_init 10006910
+
+gps_init 10006d0c
+	uart1_init 10009338
+
+uart1_init 10009338
+
+nav_init 1000901c
+
+ir_init 10007174
+	adc_buf_channel 10006bd8
+
+adc_buf_channel 10006bd8
+
+estimator_init 10009380
+
+periodic_task 1000492c
+	estimator_propagate_state 10009850
+	navigation_task 10003fc0
+	altitude_control_task 10004844
+	reporting_task 1000042c
+	climb_control_task 10004888
+	stabilisation_task 10004bbc
+	link_fbw_send 10006928
+
+estimator_propagate_state 10009850
+
+navigation_task 10003fc0
+	nav_home 10007a78
+	nav_update 10007cec
+	course_pid_run 100073ac
+
+nav_home 10007a78
+
+nav_update 10007cec
+	approaching 100076e8
+	fly_to 100077c4
+	fly_to_xy 10009034
+
+approaching 100076e8
+
+fly_to 100077c4
+
+fly_to_xy 10009034
+
+course_pid_run 100073ac
+
+altitude_control_task 10004844
+	altitude_pid_run 10007674
+
+altitude_pid_run 10007674
+
+reporting_task 1000042c
+
+climb_control_task 10004888
+	climb_pid_run 1000746c
+
+climb_pid_run 1000746c
+
+stabilisation_task 10004bbc
+	ir_update 100071c0
+	estimator_update_state_infrared 1000944c
+	roll_pitch_pid_run 10007274
+
+ir_update 100071c0
+
+estimator_update_state_infrared 1000944c
+
+roll_pitch_pid_run 10007274
+
+link_fbw_send 10006928
+
+receive_gps_data_task 10004c6c
+	parse_gps_msg 10006d38
+	use_gps_pos 10004cc0
+
+parse_gps_msg 10006d38
+
+use_gps_pos 10004cc0
+	estimator_update_state_gps 100097b0
+
+estimator_update_state_gps 100097b0
+	estimator_update_ir_estim 100094e8
+
+estimator_update_ir_estim 100094e8
+
+radio_control_task 1000302c
+	inflight_calib 10009854
+	ir_gain_calib 10007210
+
+inflight_calib 10009854
+
+ir_gain_calib 10007210
+

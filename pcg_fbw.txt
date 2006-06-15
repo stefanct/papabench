@@ -1,0 +1,56 @@
+
+PCG
+
+main 100004c8
+	uart_init_tx 1000165c
+	uart_print_string 100017e4
+	adc_init 1000189c
+	adc_buf_channel 10001888
+	servo_init 10000f54
+	spi_init 10001514
+	test_ppm_task 10000670
+	check_mega128_values_task 100007f4
+	send_data_to_autopilot_task 1000047c
+	check_failsafe_task 10000794
+	servo_transmit 100010c4
+
+uart_init_tx 1000165c
+
+uart_print_string 100017e4
+	uart_transmit 100016b4
+
+uart_transmit 100016b4
+
+adc_init 1000189c
+
+adc_buf_channel 10001888
+
+servo_init 10000f54
+
+spi_init 10001514
+
+test_ppm_task 10000670
+	last_radio_from_ppm 10000968
+	servo_set 10001148
+
+last_radio_from_ppm 10000968
+
+servo_set 10001148
+
+check_mega128_values_task 100007f4
+	servo_set 10001148
+
+send_data_to_autopilot_task 1000047c
+	to_autopilot_from_last_radio 10000370
+	spi_reset 100014d0
+
+to_autopilot_from_last_radio 10000370
+
+spi_reset 100014d0
+
+check_failsafe_task 10000794
+	servo_set 10001148
+
+servo_transmit 100010c4
+	uart_transmit 100016b4
+
