@@ -19,28 +19,34 @@ Introduction
 
 Paparazzi is an attempt to develop a cheap fixed wing UAV (Unmanned Air Vehicle). It develops a complete system hardware and software that may be installed on a variety of aircrafts. It comprises an embedded system and a ground station.
 The Paparazzi distribution is only available for a Linux environment but may be configured for several aircraft configurations. 
-PapaBench is bound only to the embedded part of Paparazzi and to the default aircraft configuration. This configuration includes a MC3030radio-command, a Twinstar3 model-making aircraft, the flight plan used during the first European MAV Flight Competition held in Braunschweig Germany and a classic ground station consisting of the MC3030 radio-command, a radio receiver and a laptop.
+PapaBench is bound only to the embedded part of Paparazzi and to the default aircraft configuration. This configuration includes a Twinstar3 model-making aircraft, the flight plan used during the first European MAV Flight Competition held in Braunschweig Germany and a classic ground station consisting of the MC3030 radio-command, a radio receiver and a laptop.
 The first generation of the embedded system enables us to save the C header files found in sw/var/include directory. These headers are generated from XML files containing the configuration of the airframes, the radio commands and the flight plan.
 Then we analyzed the static sources and the generated headers in order to create PapaBench. We have excluded the sources of the ground station in charge of  monitoring the flight, display statistics, programming the mission and generating the embedded system sources.
 
 Directories description:
 -----------------------
-aadl_sources  :contains the aadl description of PapaBench. Their is four description of the benchmark according
+aadl_sources  :contains the aadl description of PapaBench. Their is four descriptions of the benchmark 
 	       since we analyzed four cases for the periodicity of tasks and interruptions.
 		- Version 1: Tasks and Interruptions are periodic non preemptive (PnP)
 		- Version 2: Tasks are periodic, Interruptions are aperiodic but both non preemptive (PnP, AnP)
 		- Version 3: Tasks and interruptions are periodic preemptive (PP)
 		- Version 4: Tasks are periodic , interruptions are aperiodic but both preemptive (PP, AP)
+
 avr  : holds the header files of the AVR C libc project
+
 conf : is the configuration directory
+
 sw   : has to sub-directories one for Fly_by_wire source code and the other for autopilot source code
+
 Loops_Bounds.txt  : gives for each loop encountered in the sources its maximum iteration number.
+
 pcg_autopilot.txt and pcg_fbw.txt  :provide the Program Call Graph for the autopilot and the fly_by_wire code respectively
 
 
 Compilation details
 -------------------
 Our objective was to enable a user to compile the benchmark without the requirement of the whole Paparazzi building environment and for different architectures. Until now, we have experimented the compilation for PowerPC and x86 architectures using the gcc compiler suite but it should be easy to adapt PapaBench to other configurations.
+
 ***********************************************
 *                IMPORTANT                    *
 ***********************************************
