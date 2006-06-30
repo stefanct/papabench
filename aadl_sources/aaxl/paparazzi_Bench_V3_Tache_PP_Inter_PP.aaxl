@@ -20,7 +20,7 @@
     <comment>--Send Message to MCU0</comment>
     <comment>--Interruptions:</comment>
     <comment>--Receive/Send Data via SPI</comment>
-    <comment>--Servo Interruption</comment>
+    <comment>--Servos Interruptions (6 interruprions)</comment>
     <comment>--Taches MCU0</comment>
     <comment>--radio command task</comment>
     <comment>--navigation</comment>
@@ -41,7 +41,12 @@
   <busImpl name="Device_Bus.MCU1" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/busType[@name=Device_Bus]"/>
   <deviceType name="Compteur">
     <features>
-      <dataPort name="Cde_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
+      <dataPort name="Data_Elev_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Data_AilL_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Data_AilR_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Data_MotorL_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Data_MotorR_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Data_Rudder_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
       <dataPort name="Data_Elev_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
       <dataPort name="Data_AilL_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
       <dataPort name="Data_AilR_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
@@ -72,6 +77,12 @@
     <comment>-- au moins il faut que cette tache soit sporadic</comment>
     <comment>--sporadic veut dire que la tache est declenchee par l'arrivee d'un evenement</comment>
     <comment>--mais le temps entre deux dispatch successifs ne doit pas etre &lt; a la periode</comment>
+    <features>
+      <eventDataPort name="RC_Evt_Input"/>
+      <dataPort name="RC_Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_Radio.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Radio]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -85,20 +96,22 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="RC_Evt_Input"/>
-      <dataPort name="RC_Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_Radio.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Radio]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Reception_Decodage">
+    <features>
+      <dataPort name="RC_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
+      <dataPort name="Data_Decoded_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
+      <dataPort name="Radio_ok_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Radio_Really_Lost_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Mode_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Reception_Decodage.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Reception_Decodage]">
+    <comment>--Periode deduite de PPM.h >> PPM_FREQ</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -112,24 +125,21 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;test_ppm_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="RC_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
-      <dataPort name="Data_Decoded_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
-      <dataPort name="Radio_ok_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Radio_Really_Lost_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Mode_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Reception_Decodage.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Reception_Decodage]">
-    <comment>--Periode deduite de PPM.h >> PPM_FREQ</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Check_Autopilot_Values">
+    <features>
+      <dataPort name="Mode_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Mega128_Ok_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Param_Vol_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <dataPort name="Servo_Cdes_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Check_Autopilot_Values.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Autopilot_Values]">
+    <comment>--20Hz</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -143,23 +153,22 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;check_mega128_values_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="Mode_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Mega128_Ok_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Param_Vol_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <dataPort name="Servo_Cdes_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Check_Autopilot_Values.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Autopilot_Values]">
-    <comment>--20Hz</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Check_Failsafe">
+    <features>
+      <dataPort name="Radio_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Radio_Really_Lost_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Mode_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Mega128_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Servo_Cdes_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Check_Failsafe.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Failsafe]">
+    <comment>--20Hz</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -173,25 +182,20 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;check_failsafe_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="Radio_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Radio_Really_Lost_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Mode_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Mega128_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Servo_Cdes_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Check_Failsafe.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Failsafe]">
-    <comment>--40Hz</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Interruption_Envoi_Servo">
     <comment>--Ce thread gere l'interruption d'envoi des parametres au servos</comment>
+    <features>
+      <eventDataPort name="Signal_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
+      <dataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_Envoi_Servo.Elevator" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -205,23 +209,171 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="Signal_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
-      <dataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_Envoi_Servo.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
-    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="8" value="8" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Elevator]/callSequences/callSequence.0/call[@name=Elevator_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Elevator]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="Elevator_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_Elevator]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
+  </threadImpl>
+  <threadImpl name="Interruption_Envoi_Servo.MotorL" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=System_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/servo.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="58" value="58" base="10"/>
+      </propertyAssociation>
+    </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorL]/callSequences/callSequence.0/call[@name=MotorL_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorL]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="MotorL_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_MotorL]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
+  </threadImpl>
+  <threadImpl name="Interruption_Envoi_Servo.MotorR" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=System_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/servo.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="66" value="66" base="10"/>
+      </propertyAssociation>
+    </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorR]/callSequences/callSequence.0/call[@name=MotorR_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorR]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="MotorR_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_MotorR]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
+  </threadImpl>
+  <threadImpl name="Interruption_Envoi_Servo.AileronL" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=System_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/servo.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="74" value="74" base="10"/>
+      </propertyAssociation>
+    </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronL]/callSequences/callSequence.0/call[@name=AileronL_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronL]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="AileronL_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_AileronL]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
+  </threadImpl>
+  <threadImpl name="Interruption_Envoi_Servo.AileronR" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=System_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/servo.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="82" value="82" base="10"/>
+      </propertyAssociation>
+    </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronR]/callSequences/callSequence.0/call[@name=AileronR_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronR]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="AileronR_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_AileronR]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
+  </threadImpl>
+  <threadImpl name="Interruption_Envoi_Servo.Rudder" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]">
+    <comment>--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos</comment>
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=System_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/servo.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="90" value="90" base="10"/>
+      </propertyAssociation>
+    </properties>
+    <connections>
+      <parameterConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Rudder]/callSequences/callSequence.0/call[@name=Rudder_Value]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Rudder]" src="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]/features/parameter[@name=Result]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]"/>
+    </connections>
+    <callSequences>
+      <callSequence>
+        <call name="Rudder_Value" dataSubprogram="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=TabServos]/features/subprogram[@name=Get_Rudder]" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/subprogramType[@name=Get_Integer16]"/>
+      </callSequence>
+    </callSequences>
   </threadImpl>
   <threadType name="Pilotage_Servo_Cdes">
     <comment>--this thread gets the flight parameters and transmit them to the Counter </comment>
     <comment>--fonction servo_transmit</comment>
+    <features>
+      <eventDataPort name="Data_Cp_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
+      <dataPort name="Param_Vol_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]">
+        <comment>--Cp :Compteur</comment>
+      </dataPort>
+    </features>
+  </threadType>
+  <threadImpl name="Pilotage_Servo_Cdes.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]">
+    <comment>--20Hz;</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -235,17 +387,6 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;servo_transmit&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="Data_Cp_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]"/>
-      <dataPort name="Param_Vol_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]">
-        <comment>--Cp :Compteur</comment>
-      </dataPort>
-    </features>
-  </threadType>
-  <threadImpl name="Pilotage_Servo_Cdes.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]">
-    <comment>--20Hz;</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
@@ -253,6 +394,17 @@
   </threadImpl>
   <threadType name="Interruption_SPI_MCU1">
     <comment>--envoi reception signaux via SPI</comment>
+    <features>
+      <eventDataPort name="Evt_Rec_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <dataPort name="Data_Rec_MCU1_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <eventDataPort name="Data_Send_SPI_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]">
+        <comment>--fourni a MCU1</comment>
+      </eventDataPort>
+      <eventDataPort name="Evt_Send_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <eventPort name="AP_Evt_Output" direction="out"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_SPI_MCU1.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU1]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -266,19 +418,6 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="Evt_Rec_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <dataPort name="Data_Rec_MCU1_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <eventDataPort name="Data_Send_SPI_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]">
-        <comment>--fourni a MCU1</comment>
-      </eventDataPort>
-      <eventDataPort name="Evt_Send_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <eventPort name="AP_Evt_Output" direction="out"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_SPI_MCU1.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU1]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
       </propertyAssociation>
@@ -286,6 +425,15 @@
   </threadImpl>
   <threadType name="Send_Data_MCU0">
     <comment>--this thread sends data to and receives data from MCU0</comment>
+    <features>
+      <dataPort name="MCU1_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
+      <eventDataPort name="MCU1_Send_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <dataPort name="Radio_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+      <dataPort name="Radio_Really_Lost_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Send_Data_MCU0.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_MCU0]">
+    <comment>--meme periode que reception_Decodage</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -299,28 +447,12 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;send_data_to_autopilot_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="MCU1_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
-      <eventDataPort name="MCU1_Send_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <dataPort name="Radio_Ok_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-      <dataPort name="Radio_Really_Lost_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Send_Data_MCU0.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_MCU0]">
-    <comment>--meme periode que reception_Decodage</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <processType name="RecepteurCde_PilotageServo">
-    <properties>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
-        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/main.c&quot;"/>
-      </propertyAssociation>
-    </properties>
     <features>
       <eventDataPort name="Radio_Cdes_Input"/>
       <eventPort name="RC_Evt_Input"/>
@@ -328,12 +460,22 @@
       <eventDataPort name="Cdes_Vol_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]">
         <comment>--Autopilot Input</comment>
       </eventDataPort>
-      <dataPort name="Cde_Serv_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=TabServos.Impl]">
+      <dataPort name="Cde_Elevator_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]">
         <comment>--data transmission to MCU0</comment>
       </dataPort>
+      <dataPort name="Cde_MotorL_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Cde_MotorR_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Cde_AileronL_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Cde_AileronR_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
+      <dataPort name="Cde_Rudder_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Integer_16]"/>
     </features>
   </processType>
   <processImpl name="RecepteurCde_PilotageServo.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]">
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;fly_by_wire/main.c&quot;"/>
+      </propertyAssociation>
+    </properties>
     <connections>
       <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_RC_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Radio]/features/eventDataPort[@name=RC_Evt_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/eventDataPort[@name=Radio_Cdes_Input]"/>
       <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_RC_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Rec_Dec_Th]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Radio]/features/dataPort[@name=RC_Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Reception_Decodage]/features/dataPort[@name=RC_Data_Input]"/>
@@ -351,8 +493,18 @@
       <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_SPI_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Check_Ap_Th]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU1]/features/dataPort[@name=Data_Rec_MCU1_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Autopilot_Values]/features/dataPort[@name=Param_Vol_Input]"/>
       <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Check_Ap_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Autopilot_Values]/features/dataPort[@name=Servo_Cdes_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/dataPort[@name=Param_Vol_Input]"/>
       <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=failsafe]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Check_Fail_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Check_Failsafe]/features/dataPort[@name=Servo_Cdes_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/dataPort[@name=Param_Vol_Input]"/>
-      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Servo_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
-      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Servo_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Serv_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Elevator_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_MotorL_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_MotorR_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_AileronL_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_AileronR_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Pilot_Serv_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Rudder_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/eventDataPort[@name=Signal_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Pilotage_Servo_Cdes]/features/eventDataPort[@name=Data_Cp_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Elevator_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Elevator_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_MotorL_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_MotorL_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_MotorR_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_MotorR_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_AileronL_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_AileronL_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_AileronR_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_AileronR_Output]"/>
+      <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=manual] /aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/modes/mode[@name=auto]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_Rudder_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=RecepteurCde_PilotageServo.Impl]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]/features/dataPort[@name=Data_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Rudder_Output]"/>
     </connections>
     <modes>
       <mode name="manual" state="INITIAL"/>
@@ -371,7 +523,12 @@
       <threadSubcomponent name="Pilot_Serv_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Pilotage_Servo_Cdes.Impl]"/>
       <threadSubcomponent name="Check_Ap_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Check_Autopilot_Values.Impl]"/>
       <threadSubcomponent name="Check_Fail_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Check_Failsafe.Impl]"/>
-      <threadSubcomponent name="Interrupt_Servo_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Envoi_Servo]"/>
+      <threadSubcomponent name="Interrupt_Elevator_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Elevator]"/>
+      <threadSubcomponent name="Interrupt_MotorL_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorL]"/>
+      <threadSubcomponent name="Interrupt_MotorR_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.MotorR]"/>
+      <threadSubcomponent name="Interrupt_AileronL_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronL]"/>
+      <threadSubcomponent name="Interrupt_AileronR_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.AileronR]"/>
+      <threadSubcomponent name="Interrupt_Rudder_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Envoi_Servo.Rudder]"/>
       <threadSubcomponent name="Interrupt_SPI_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU1]"/>
       <threadSubcomponent name="Interrupt_RC_Th" classifier="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadImpl[@name=Interruption_Radio.Impl]"/>
       <dataSubcomponent name="System_Mode" classifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Boolean]">
@@ -454,7 +611,12 @@
       <eventDataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemType[@name=MCU1]/features/eventDataPort[@name=D_MCU1_Output]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/eventDataPort[@name=Cdes_Vol_Output]"/>
       <eventDataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/eventDataPort[@name=AP_Cdes_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemType[@name=MCU1]/features/eventDataPort[@name=AP_EvtData_Input]"/>
       <eventConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Recpt_dv]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/eventPort[@name=RC_Evt_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Recepteur]/features/eventPort[@name=RC_Evt_Output]"/>
-      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Serv_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Cde_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Elevator_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_Elev_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_AileronL_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_AilL_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_AileronR_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_AilR_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_MotorL_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_MotorL_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_MotorR_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_MotorR_Input]"/>
+      <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/processSubcomponent[@name=Proc_RcptCde_PilotServ]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=RecepteurCde_PilotageServo]/features/dataPort[@name=Cde_Rudder_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_Rudder_Input]"/>
       <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Ser_Rudder_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_Rudder_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Servo]/features/dataPort[@name=Data_Input]"/>
       <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Ser_Elevator_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_Elev_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Servo]/features/dataPort[@name=Data_Input]"/>
       <dataConnection srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Cpt_dv]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/systemImpl[@name=MCU1.Impl]/subcomponents/deviceSubcomponent[@name=Ser_AileronL_dv]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Compteur]/features/dataPort[@name=Data_AilL_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/deviceType[@name=Servo]/features/dataPort[@name=Data_Input]"/>
@@ -557,6 +719,12 @@
   <threadType name="Interruption_GPS">
     <comment>-- Ce thread recoit les sigaux GPS et les transforme </comment>
     <comment>-- en donnees utilisables</comment>
+    <features>
+      <eventDataPort name="GPS_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Stream_Element.Generic]"/>
+      <dataPort name="GPS_Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_GPS.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_GPS]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -570,20 +738,19 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;parse_ubx&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="GPS_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Stream_Element.Generic]"/>
-      <dataPort name="GPS_Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_GPS.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_GPS]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Data_Acquisition_GPS">
+    <features>
+      <dataPort name="GPS_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
+      <dataPort name="GPS_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Data_Acquisition_GPS.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Data_Acquisition_GPS]">
+    <comment>--4hz </comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -597,15 +764,6 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;receive_gps_data_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="GPS_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
-      <dataPort name="GPS_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Data_Acquisition_GPS.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Data_Acquisition_GPS]">
-    <comment>--4hz </comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
       </propertyAssociation>
@@ -613,6 +771,17 @@
   </threadImpl>
   <threadType name="Navigation">
     <comment>--controle la navigation de l'avion</comment>
+    <features>
+      <dataPort name="GPS_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
+      <dataPort name="Angle_Roulis_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Angle_Tangage_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Taux_Montee_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Altitude_Desiree_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Navigation.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Navigation]">
+    <comment>--Ce thread est declenche a la frequence des informations delivrees </comment>
+    <comment>--par le GPS 4Hz, sa periode est de 250 ms</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -626,19 +795,6 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;navigation_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="GPS_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Position.GPS]"/>
-      <dataPort name="Angle_Roulis_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Angle_Tangage_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Taux_Montee_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Altitude_Desiree_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Navigation.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Navigation]">
-    <comment>--Ce thread est declenche a la frequence des informations delivrees </comment>
-    <comment>--par le GPS 4Hz, sa periode est de 250 ms</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
       </propertyAssociation>
@@ -648,6 +804,14 @@
     <comment>--le thread Navigation est toujours suivi, dans cet ordre,</comment>
     <comment>-- par les threads Altitude_Control et Climb_Controle d'ou leur Periode</comment>
     <comment>--Controle l'altitude</comment>
+    <features>
+      <dataPort name="Altitude_Desiree_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Montee_Desiree_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]">
+        <comment>--fourni par navigation</comment>
+      </dataPort>
+    </features>
+  </threadType>
+  <threadImpl name="Altitude_Control.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Altitude_Control]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -661,16 +825,6 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;altitude_control_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="Altitude_Desiree_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Montee_Desiree_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]">
-        <comment>--fourni par navigation</comment>
-      </dataPort>
-    </features>
-  </threadType>
-  <threadImpl name="Altitude_Control.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Altitude_Control]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
       </propertyAssociation>
@@ -678,20 +832,6 @@
   </threadImpl>
   <threadType name="Climb_Control">
     <comment>--controle la montee</comment>
-    <properties>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
-        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
-      </propertyAssociation>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
-        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=Time_Sharing_Preemption]"/>
-      </propertyAssociation>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
-        <propertyValue xsi:type="property:StringValue" value="&quot;autopilot/main.c&quot;"/>
-      </propertyAssociation>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
-        <propertyValue xsi:type="property:StringValue" value="&quot;climb_control_task&quot;"/>
-      </propertyAssociation>
-    </properties>
     <features>
       <dataPort name="Montee_Desiree_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
       <dataPort name="Gaz_Desire_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]">
@@ -708,14 +848,6 @@
   </threadType>
   <threadImpl name="Climb_Control.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Climb_Control]">
     <properties>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
-      </propertyAssociation>
-    </properties>
-  </threadImpl>
-  <threadType name="Stabilisation">
-    <comment>-- Controle la stabilisation et transmet les donnees a MCU1</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
       </propertyAssociation>
@@ -726,9 +858,15 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;autopilot/main.c&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
-        <propertyValue xsi:type="property:StringValue" value="&quot;stabilisation_task&quot;"/>
+        <propertyValue xsi:type="property:StringValue" value="&quot;climb_control_task&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="250" value="250" base="10"/>
       </propertyAssociation>
     </properties>
+  </threadImpl>
+  <threadType name="Stabilisation">
+    <comment>-- Controle la stabilisation et transmet les donnees a MCU1</comment>
     <features>
       <comment>-- + Data transmission to MCU1</comment>
       <dataPort name="Gaz_Desire_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
@@ -749,12 +887,34 @@
   <threadImpl name="Stabilisation.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Stabilisation]">
     <comment>--20 hertz; </comment>
     <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]">
+        <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=Thread_Properties]/propertySet[@name=Thread_Properties]/propertyDefinition[@name=Preemption]/propertyType/enumLiteral[@name=Time_Sharing_Preemption]"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;autopilot/main.c&quot;"/>
+      </propertyAssociation>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;stabilisation_task&quot;"/>
+      </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Interruption_SPI_MCU0">
+    <features>
+      <eventDataPort name="Evt_Rec_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <dataPort name="Data_Rec_MCU0_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <eventDataPort name="Data_Send_SPI_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]">
+        <comment>--fourni a MCU0</comment>
+      </eventDataPort>
+      <eventDataPort name="Evt_Send_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_SPI_MCU0.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU0]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -770,24 +930,20 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <eventDataPort name="Evt_Rec_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <dataPort name="Data_Rec_MCU0_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <eventDataPort name="Data_Send_SPI_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]">
-        <comment>--fourni a MCU0</comment>
-      </eventDataPort>
-      <eventDataPort name="Evt_Send_SPI_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_SPI_MCU0.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU0]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Send_Data_MCU1">
+    <features>
+      <dataPort name="MCU0_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
+      <eventDataPort name="MCU0_Send_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Send_Data_MCU1.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_MCU1]">
+    <comment>--ce thread se declenche toujours apres la Stabilisation d'ou sa periode</comment>
+    <comment>--20Hz</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -801,22 +957,21 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;link_fbw_send&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="MCU0_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Tableau.Generic]"/>
-      <eventDataPort name="MCU0_Send_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Send_Data_MCU1.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_MCU1]">
-    <comment>--ce thread se declenche toujours apres la Stabilisation d'ou sa periode</comment>
-    <comment>--20Hz</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="50" value="50" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Control_By_Radio_Cde">
+    <features>
+      <dataPort name="RC_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <dataPort name="Angle_Roulis_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Angle_Tangage_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <dataPort name="Gaz_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
+      <eventPort name="RC_Evt_Output" direction="out"/>
+    </features>
+  </threadType>
+  <threadImpl name="Control_By_Radio_Cde.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Control_By_Radio_Cde]">
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -830,23 +985,18 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;radio_control_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="RC_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <dataPort name="Angle_Roulis_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Angle_Tangage_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <dataPort name="Gaz_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataType[@name=Float]"/>
-      <eventPort name="RC_Evt_Output" direction="out"/>
-    </features>
-  </threadType>
-  <threadImpl name="Control_By_Radio_Cde.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Control_By_Radio_Cde]">
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="25" value="25" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Send_Data_Ground_Station">
+    <features>
+      <dataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Send_Data_Ground_Station.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_Ground_Station]">
+    <comment>--10Hz</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -860,20 +1010,19 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;reporting_task&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Send_Data_Ground_Station.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Send_Data_Ground_Station]">
-    <comment>--10Hz</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="100" value="100" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <threadType name="Interruption_Modem">
+    <features>
+      <dataPort name="Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+      <eventDataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
+    </features>
+  </threadType>
+  <threadImpl name="Interruption_Modem.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Modem]">
+    <comment>-- a verifier</comment>
     <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Dispatch_Protocol]">
         <propertyValue xsi:type="property:EnumValue" enumLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Supported_Dispatch_Protocols]/enumLiteral[@name=Periodic]"/>
@@ -887,26 +1036,12 @@
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Compute_Entrypoint]">
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
-    </properties>
-    <features>
-      <dataPort name="Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-      <eventDataPort name="Data_Output" direction="out" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
-    </features>
-  </threadType>
-  <threadImpl name="Interruption_Modem.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_Modem]">
-    <comment>-- a verifier</comment>
-    <properties>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
         <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="100" value="100" base="10"/>
       </propertyAssociation>
     </properties>
   </threadImpl>
   <processType name="Nav_Stab_Control_Proc">
-    <properties>
-      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
-        <propertyValue xsi:type="property:StringValue" value="&quot;autopilot/mainloop.c&quot;"/>
-      </propertyAssociation>
-    </properties>
     <features>
       <eventDataPort name="MCU1_Data_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Inter_mcu_msg.Generic]"/>
       <eventDataPort name="GPS_Input" dataClassifier="/aadlSpec[@name=Data_Types]/packageSpec[@name=Data_Types]/aadlPublic/dataImpl[@name=Stream_Element.Generic]">
@@ -927,6 +1062,11 @@
     </features>
   </processType>
   <processImpl name="Nav_Stab_Control_Proc.Impl" compType="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=Nav_Stab_Control_Proc]">
+    <properties>
+      <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Source_Text]">
+        <propertyValue xsi:type="property:StringValue" value="&quot;autopilot/mainloop.c&quot;"/>
+      </propertyAssociation>
+    </properties>
     <connections>
       <eventDataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_SPI_Th]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU0]/features/eventDataPort[@name=Evt_Rec_SPI_Input]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processType[@name=Nav_Stab_Control_Proc]/features/eventDataPort[@name=MCU1_Data_Input]"/>
       <dataConnection inModes="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]/modes/mode[@name=manual]" srcContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]/subcomponents/threadSubcomponent[@name=Interrupt_SPI_Th]" dstContext="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/processImpl[@name=Nav_Stab_Control_Proc.Impl]/subcomponents/threadSubcomponent[@name=Ctrl_By_RC_Th]" src="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Interruption_SPI_MCU0]/features/dataPort[@name=Data_Rec_MCU0_Output]" dst="/aadlSpec[@name=paparazzi_Bench_V3_Tache_PP_Inter_PP]/threadType[@name=Control_By_Radio_Cde]/features/dataPort[@name=RC_Data_Input]"/>

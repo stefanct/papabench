@@ -20,7 +20,7 @@
 --Send Message to MCU0
 --Interruptions:
 --Receive/Send Data via SPI
---Servo Interruption
+--Servos Interruptions (6 interruptions)
 
 --Taches MCU0
 --radio command task
@@ -224,7 +224,12 @@ end Device_Bus.MCU1;
 
 device Compteur
 features
-	Cde_Input : in data port Data_Types::TabServos.Impl;
+	Data_Elev_Input : in data port Data_Types::Integer_16;
+	Data_AilL_Input : in data port Data_Types::Integer_16;
+	Data_AilR_Input : in data port Data_Types::Integer_16;
+	Data_MotorL_Input : in data port Data_Types::Integer_16;
+	Data_MotorR_Input : in data port Data_Types::Integer_16;
+	Data_Rudder_Input : in data port Data_Types::Integer_16;
 	Data_Elev_Output : out data port Data_Types::Integer_16;
 	Data_AilL_Output : out data port Data_Types::Integer_16;
 	Data_AilR_Output : out data port Data_Types::Integer_16;
@@ -259,15 +264,14 @@ thread Interruption_Radio
 features
 	RC_Evt_Input : in event data port;
 	RC_Data_Output: out data port Data_Types::Tableau.Generic;
+end Interruption_Radio;
+
+thread implementation Interruption_Radio.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "fly_by_wire/ppm.c";
 	Compute_Entrypoint => "SIGNAL";
-end Interruption_Radio;
-
-thread implementation Interruption_Radio.Impl
-Properties 
 	Period =>25 ms;
 end Interruption_Radio.Impl;
 
@@ -278,15 +282,14 @@ features
 	Radio_ok_Output : out data port Data_Types::Boolean;
 	Radio_Really_Lost_Output : out data port Data_Types::Boolean;
 	Mode_Output : out data port Data_Types::Boolean;
+end Reception_Decodage;
+
+thread implementation Reception_Decodage.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "fly_by_wire/main.c";
 	Compute_Entrypoint => "test_ppm_task";
-end Reception_Decodage;
-
-thread implementation Reception_Decodage.Impl
-properties
 	Period =>25 ms;--Periode deduite de PPM.h >> PPM_FREQ
 end Reception_Decodage.Impl;
 
@@ -296,15 +299,14 @@ features
 	Mega128_Ok_Output : out data port Data_Types::Boolean;
 	Param_Vol_Input : in data port Data_Types::Inter_mcu_msg.Generic;
 	Servo_Cdes_Output: out data port Data_Types::TabServos.Impl;
+end Check_Autopilot_Values;
+
+thread implementation Check_Autopilot_Values.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/main.c";
 	Compute_Entrypoint => "check_mega128_values_task";
-end Check_Autopilot_Values;
-
-thread implementation Check_Autopilot_Values.Impl
-properties
 	Period=> 50 ms;--20Hz
 end Check_Autopilot_Values.Impl;
 
@@ -315,34 +317,102 @@ features
 	Mode_Input : in data port Data_Types::Boolean;
 	Mega128_Ok_Input : in data port Data_Types::Boolean;
 	Servo_Cdes_Output: out data port Data_Types::TabServos.Impl;
+end Check_Failsafe;
+
+thread implementation Check_Failsafe.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/main.c";
 	Compute_Entrypoint => "check_failsafe_task";
-end Check_Failsafe;
-
-thread implementation Check_Failsafe.Impl
-properties
-	Period=> 25 ms;--40Hz
+	Period=> 50 ms;--20Hz
 end Check_Failsafe.Impl;
 
 --Ce thread gere l'interruption d'envoi des parametres au servos
 thread Interruption_Envoi_Servo
 features
 	Signal_Input: in event data port Data_Types::TabServos.Impl;
-	Data_Output : out data port Data_Types::TabServos.Impl;
+	Data_Output : out data port Data_Types::Integer_16;
+end Interruption_Envoi_Servo;
+
+thread implementation Interruption_Envoi_Servo.Elevator
+calls {
+		Elevator_Value: subprogram Data_Types::TabServos.Get_Elevator;};	
+connections
+	parameter Elevator_Value.Result->Data_Output;
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-end Interruption_Envoi_Servo;
+	Period=> 50 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.Elevator;
 
-thread implementation Interruption_Envoi_Servo.Impl
+thread implementation Interruption_Envoi_Servo.MotorL
+calls {
+		MotorL_Value: subprogram Data_Types::TabServos.Get_MotorL;};	
+connections
+	parameter MotorL_Value.Result->Data_Output;
 properties
-	Period=> 8 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
-end Interruption_Envoi_Servo.Impl;
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "fly_by_wire/servo.c";
+	Compute_Entrypoint => "SIGNAL";
+	Period=> 58 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.MotorL;
+
+thread implementation Interruption_Envoi_Servo.MotorR
+calls {
+		MotorR_Value: subprogram Data_Types::TabServos.Get_MotorR;};	
+connections
+	parameter MotorR_Value.Result->Data_Output;
+properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "fly_by_wire/servo.c";
+	Compute_Entrypoint => "SIGNAL";
+	Period=> 66 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.MotorR;
+
+thread implementation Interruption_Envoi_Servo.AileronL
+calls {
+		AileronL_Value: subprogram Data_Types::TabServos.Get_AileronL;};	
+connections
+	parameter AileronL_Value.Result->Data_Output;
+properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "fly_by_wire/servo.c";
+	Compute_Entrypoint => "SIGNAL";
+	Period=> 74 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.AileronL;
+
+thread implementation Interruption_Envoi_Servo.AileronR
+calls {
+		AileronR_Value: subprogram Data_Types::TabServos.Get_AileronR;};	
+connections
+	parameter AileronR_Value.Result->Data_Output;
+properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "fly_by_wire/servo.c";
+	Compute_Entrypoint => "SIGNAL";
+	Period=> 82 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.AileronR;
+
+thread implementation Interruption_Envoi_Servo.Rudder
+calls {
+		Rudder_Value: subprogram Data_Types::TabServos.Get_Rudder;};	
+connections
+	parameter Rudder_Value.Result->Data_Output;
+properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "fly_by_wire/servo.c";
+	Compute_Entrypoint => "SIGNAL";
+	Period=> 90 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+end Interruption_Envoi_Servo.Rudder;
+
 
 --this thread gets the flight parameters and transmit them to the Counter 
 --fonction servo_transmit
@@ -350,15 +420,14 @@ thread Pilotage_Servo_Cdes
 features
 	Data_Cp_Output : out event data port Data_Types::TabServos.Impl;--Cp :Compteur
 	Param_Vol_Input : in data port Data_Types::TabServos.Impl;
+end Pilotage_Servo_Cdes;
+
+thread implementation Pilotage_Servo_Cdes.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint =>  "servo_transmit";
-end Pilotage_Servo_Cdes;
-
-thread implementation Pilotage_Servo_Cdes.Impl
-properties
 	Period => 50ms;--20Hz;
 end Pilotage_Servo_Cdes.Impl;
 
@@ -370,15 +439,14 @@ features
 	Data_Send_SPI_Output: out  event data port Data_Types::Inter_mcu_msg.Generic;
 	Evt_Send_SPI_Input: in event data port Data_Types::Inter_mcu_msg.Generic;
 	AP_Evt_Output : out event port;
+end Interruption_SPI_MCU1;
+
+thread implementation Interruption_SPI_MCU1.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/spi.c";
 	Compute_Entrypoint => "SIGNAL";
-end Interruption_SPI_MCU1;
-
-thread implementation Interruption_SPI_MCU1.Impl
-properties
 	Period=> 25 ms;
 end Interruption_SPI_MCU1.Impl;
 
@@ -389,15 +457,14 @@ features
 	MCU1_Send_Output : out event data port Data_Types::Inter_mcu_msg.Generic;
 	Radio_Ok_Input : in data port Data_Types::Boolean;
 	Radio_Really_Lost_Input : in data port Data_Types::Boolean;
+end Send_Data_MCU0;
+
+thread implementation Send_Data_MCU0.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "fly_by_wire/main.c";
-	Compute_Entrypoint => "send_data_to_autopilot_task";	
-end Send_Data_MCU0;
-
-thread implementation Send_Data_MCU0.Impl
-properties 
+	Compute_Entrypoint => "send_data_to_autopilot_task";	 
 	Period => 25 ms; --meme periode que reception_Decodage
 end Send_Data_MCU0.Impl;
 
@@ -407,9 +474,13 @@ features
 	RC_Evt_Input : in event port;
 	AP_Cdes_Input : in event data port Data_Types::Inter_mcu_msg.Generic;--Autopilot Input
 	Cdes_Vol_Output : out event data port Data_Types::Inter_mcu_msg.Generic;--data transmission to MCU0
-	Cde_Serv_Output : out data port Data_Types::TabServos.Impl;
-properties
-	Source_Text => "fly_by_wire/main.c";
+	
+	Cde_Elevator_Output : out data port Data_Types::Integer_16;
+	Cde_MotorL_Output : out data port Data_Types::Integer_16;
+	Cde_MotorR_Output : out data port Data_Types::Integer_16;
+	Cde_AileronL_Output : out data port Data_Types::Integer_16;
+	Cde_AileronR_Output : out data port Data_Types::Integer_16;
+	Cde_Rudder_Output : out data port Data_Types::Integer_16;
 end RecepteurCde_PilotageServo;
 
 process implementation RecepteurCde_PilotageServo.Impl
@@ -419,7 +490,14 @@ subcomponents
 	Pilot_Serv_Th : thread Pilotage_Servo_Cdes.Impl;
 	Check_Ap_Th : thread Check_Autopilot_Values.Impl;
 	Check_Fail_Th: thread Check_Failsafe.Impl;
-	Interrupt_Servo_Th:thread Interruption_Envoi_Servo;
+	
+	Interrupt_Elevator_Th:thread Interruption_Envoi_Servo.Elevator;
+	Interrupt_MotorL_Th:thread Interruption_Envoi_Servo.MotorL;
+	Interrupt_MotorR_Th:thread Interruption_Envoi_Servo.MotorR;
+	Interrupt_AileronL_Th:thread Interruption_Envoi_Servo.AileronL;
+	Interrupt_AileronR_Th:thread Interruption_Envoi_Servo.AileronR;
+	Interrupt_Rudder_Th:thread Interruption_Envoi_Servo.Rudder;
+	
 	Interrupt_SPI_Th: thread Interruption_SPI_MCU1;
 	Interrupt_RC_Th: thread Interruption_Radio.Impl;
 	
@@ -449,8 +527,20 @@ connections
 	
 	data port Check_Fail_Th.Servo_Cdes_Output->Pilot_Serv_Th.Param_Vol_Input in modes (failsafe);
 	
-	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_Servo_Th.Signal_Input in modes (auto,manual);
-	data port Interrupt_Servo_Th.Data_Output->Cde_Serv_Output in modes(manual,auto);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_Elevator_Th.Signal_Input in modes (auto,manual);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_MotorL_Th.Signal_Input in modes (auto,manual);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_MotorR_Th.Signal_Input in modes (auto,manual);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_AileronL_Th.Signal_Input in modes (auto,manual);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_AileronR_Th.Signal_Input in modes (auto,manual);
+	event data port Pilot_Serv_Th.Data_Cp_Output->Interrupt_Rudder_Th.Signal_Input in modes (auto,manual);
+	
+	data port Interrupt_Elevator_Th.Data_Output->Cde_Elevator_Output in modes(manual,auto);
+	data port Interrupt_MotorL_Th.Data_Output->Cde_MotorL_Output in modes(manual,auto);
+	data port Interrupt_MotorR_Th.Data_Output->Cde_MotorR_Output in modes(manual,auto);
+	data port Interrupt_AileronL_Th.Data_Output->Cde_AileronL_Output in modes(manual,auto);
+	data port Interrupt_AileronR_Th.Data_Output->Cde_AileronR_Output in modes(manual,auto);
+	data port Interrupt_Rudder_Th.Data_Output->Cde_Rudder_Output in modes(manual,auto);
+	
 modes
 	manual : initial mode;
 	auto : mode;
@@ -460,6 +550,8 @@ modes
 	manual-[RC_Evt_Input]->auto;
 	auto-[Interrupt_SPI_Th.AP_Evt_Output]->manual;
 	manual-[RC_Evt_Input,Interrupt_SPI_Th.AP_Evt_Output]->Failsafe;
+properties
+	Source_Text => "fly_by_wire/main.c";
 end RecepteurCde_PilotageServo.Impl;
 
 processor Proc_MCU1
@@ -535,13 +627,21 @@ connections
 	event data port Proc_RcptCde_PilotServ.Cdes_Vol_Output->D_MCU1_Output;
 	event data port AP_EvtData_Input->Proc_RcptCde_PilotServ.AP_Cdes_Input; 
 	event port Recpt_dv.RC_Evt_Output-> Proc_RcptCde_PilotServ.RC_Evt_Input;
-	data port Proc_RcptCde_PilotServ.Cde_Serv_Output->Cpt_dv.Cde_Input;
+	
+	data port Proc_RcptCde_PilotServ.Cde_Elevator_Output->Cpt_dv.Data_Elev_Input;
+	data port Proc_RcptCde_PilotServ.Cde_AileronL_Output->Cpt_dv.Data_AilL_Input;
+	data port Proc_RcptCde_PilotServ.Cde_AileronR_Output->Cpt_dv.Data_AilR_Input;
+	data port Proc_RcptCde_PilotServ.Cde_MotorL_Output->Cpt_dv.Data_MotorL_Input;
+	data port Proc_RcptCde_PilotServ.Cde_MotorR_Output->Cpt_dv.Data_MotorR_Input;
+	data port Proc_RcptCde_PilotServ.Cde_Rudder_Output->Cpt_dv.Data_Rudder_Input;
+	
 	data port Cpt_dv.Data_Rudder_Output->Ser_Rudder_dv.Data_Input;
 	data port Cpt_dv.Data_Elev_Output->Ser_Elevator_dv.Data_Input;
 	data port Cpt_dv.Data_AilL_Output->Ser_AileronL_dv.Data_Input;
 	data port Cpt_dv.Data_AilR_Output->Ser_AileronR_dv.Data_Input;
 	data port Cpt_dv.Data_MotorL_Output->Ser_MotorL_dv.Data_Input;
 	data port Cpt_dv.Data_MotorR_Output->Ser_MotorR_dv.Data_Input;
+	
 properties 
 	--to bind the Proc_RcptCde_PilotServ to the memory Ram and the processor MCU1_P
 	--using predeclared properties
@@ -620,33 +720,29 @@ thread Interruption_GPS
 features
 	GPS_Input : in event data port Data_Types::Stream_Element.Generic;
 	GPS_Data_Output: out data port Data_Types::Position.GPS;
+end Interruption_GPS;
+
+thread implementation Interruption_GPS.Impl
 properties	
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "autopilot/gps_ubx.c";
-	Compute_Entrypoint => "parse_ubx";		
-end Interruption_GPS;
-
-thread implementation Interruption_GPS.Impl
-properties
+	Compute_Entrypoint => "parse_ubx";	
 	period=> 250 ms;
-	Deadline => 250 ms;
-	Compute_Execution_Time => 1 ms .. 2 ms;
 end Interruption_GPS.Impl;
 
 thread Data_Acquisition_GPS
 features
 	GPS_Data_Input : in data port Data_Types::Position.GPS;
 	GPS_Output : out data port Data_Types::Position.GPS;
-properties
-	Dispatch_Protocol=>periodic;
-	Thread_Properties::Preemption=>Non_Preemptive;
-	Source_Text => "autopilot/main.c";
-	Compute_Entrypoint => "receive_gps_data_task";		
 end Data_Acquisition_GPS;
 
 thread implementation Data_Acquisition_GPS.Impl
 properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;
+	Source_Text => "autopilot/main.c";
+	Compute_Entrypoint => "receive_gps_data_task";	
 	period => 250 ms; --4hz 
 end Data_Acquisition_GPS.Impl;
 
@@ -659,16 +755,15 @@ features
 	Angle_Tangage_Output : out data port Data_Types::Float;
 	Taux_Montee_Output: out data port Data_Types::Float;
 	Altitude_Desiree_Output: out data port Data_Types::Float;
-properties
-	Dispatch_Protocol=>periodic;
-	Thread_Properties::Preemption=>Non_Preemptive;	
-	Source_Text => "autopilot/main.c";
-	Compute_Entrypoint => "navigation_task";	
 end Navigation;
 --Ce thread est declenche a la frequence des informations delivrees 
 --par le GPS 4Hz, sa periode est de 250 ms
 thread implementation Navigation.Impl
 properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "autopilot/main.c";
+	Compute_Entrypoint => "navigation_task";
 	Period=> 250 ms;
 end Navigation.Impl;
 
@@ -680,15 +775,14 @@ thread Altitude_Control
 features
 	Altitude_Desiree_Input : in data port Data_Types::Float;--fourni par navigation
 	Montee_Desiree_Output : out data port Data_Types::Float;
+end Altitude_Control;
+
+thread implementation Altitude_Control.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "autopilot/main.c";
 	Compute_Entrypoint =>"altitude_control_task";
-end Altitude_Control;
-
-thread implementation Altitude_Control.Impl
-properties
 	Period => 250 ms;
 end Altitude_Control.Impl;
 
@@ -700,15 +794,14 @@ features
 	Angle_Tangage_Input : in data port Data_Types::Float;--Fourni par Navigation
 	Gaz_Desire_Output: out data port Data_Types::Float;
 	Angle_Tangage_Output : out data port Data_Types::Float;
+end Climb_Control;
+
+thread implementation Climb_Control.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "autopilot/main.c";
 	Compute_Entrypoint => "climb_control_task";
-end Climb_Control;
-
-thread implementation Climb_Control.Impl
-properties
 	Period => 250 ms;
 end Climb_Control.Impl;
 
@@ -721,15 +814,14 @@ features
 	IR_Input : in data port Data_Types::Stream_Element.Generic;
 	-- Param_Vol : Gaz_Output ,Prof_Output,AileronL_Output,AileronR_Output
 	Param_Vol_Output : out data port Data_Types::Tableau.Generic;
+end Stabilisation;
+
+thread implementation Stabilisation.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "autopilot/main.c";
 	Compute_Entrypoint => "stabilisation_task";
-end Stabilisation;
-
-thread implementation Stabilisation.Impl
-properties
 	Period => 50 ms;--20 hertz; 
 end Stabilisation.Impl;
 
@@ -739,15 +831,14 @@ features
 	Data_Rec_MCU0_Output: out  data port Data_Types::Inter_mcu_msg.Generic;--fourni a MCU0
 	Data_Send_SPI_Output: out  event data port Data_Types::Inter_mcu_msg.Generic;
 	Evt_Send_SPI_Input: in event data port Data_Types::Inter_mcu_msg.Generic;
-properties
-	Dispatch_Protocol=>periodic;
-	Thread_Properties::Preemption=>Non_Preemptive;
-	Source_Text => ("autopilot/spi.c", "autopilot/linf_fbw.c");
-	Thread_Properties::Entrypoints => ("SIGNAL", "SIGNAL");	
 end Interruption_SPI_MCU0;
 
 thread implementation Interruption_SPI_MCU0.Impl
 properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;
+	Source_Text => ("autopilot/spi.c", "autopilot/linf_fbw.c");
+	Thread_Properties::Entrypoints => ("SIGNAL", "SIGNAL");
 	Period=> 50 ms;
 end Interruption_SPI_MCU0.Impl;
 
@@ -755,16 +846,15 @@ thread Send_Data_MCU1
 features
 	MCU0_Data_Input : in data port Data_Types::Tableau.Generic;
 	MCU0_Send_Output : out event data port Data_Types::Inter_mcu_msg.Generic;
-properties
-	Dispatch_Protocol=>periodic;
-	Thread_Properties::Preemption=>Non_Preemptive;	
-	Source_Text => "autopilot/link_fbw.c";
-	Compute_Entrypoint => "link_fbw_send";
 end Send_Data_MCU1;
 
 --ce thread se declenche toujours apres la Stabilisation d'ou sa periode
 thread implementation Send_Data_MCU1.Impl
 properties
+	Dispatch_Protocol=>periodic;
+	Thread_Properties::Preemption=>Non_Preemptive;	
+	Source_Text => "autopilot/link_fbw.c";
+	Compute_Entrypoint => "link_fbw_send";
 	Period => 50 ms;--20Hz
 end Send_Data_MCU1.Impl;
 
@@ -775,30 +865,28 @@ features
 	Angle_Tangage_Output : out data port Data_Types::Float;
 	Gaz_Output : out data port Data_Types::Float;
 	RC_Evt_Output: out event port; 
+end Control_By_Radio_Cde;
+
+thread implementation Control_By_Radio_Cde.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "autopilot/main.c";
 	Compute_Entrypoint => "radio_control_task";
-end Control_By_Radio_Cde;
-
-thread implementation Control_By_Radio_Cde.Impl
-properties
 	Period=> 25 ms;
 end Control_By_Radio_Cde.Impl;
 
 thread Send_Data_Ground_Station
 features
 	Data_Output : out data port Data_Types::Inter_mcu_msg.Generic;
+end Send_Data_Ground_Station;
+
+thread implementation Send_Data_Ground_Station.Impl
 properties
 	Dispatch_Protocol=>periodic;
 	Thread_Properties::Preemption => Non_Preemptive;
 	Source_Text => "autopilot/main.c";
 	Compute_Entrypoint => "reporting_task";
-end Send_Data_Ground_Station;
-
-thread implementation Send_Data_Ground_Station.Impl
-properties
 	Period=> 100 ms;--10Hz
 end Send_Data_Ground_Station.Impl;
 
@@ -806,15 +894,14 @@ thread Interruption_Modem
 features
 	Data_Input : in data port Data_Types::Inter_mcu_msg.Generic;
 	Data_Output : out event data port Data_Types::Inter_mcu_msg.Generic;
+end Interruption_Modem;
+
+thread implementation Interruption_Modem.Impl
 properties
 	Dispatch_Protocol=> periodic;
 	Thread_Properties::Preemption=>Non_Preemptive;
 	Source_Text => "autopilot/modem.c";
 	Compute_Entrypoint => "SIGNAL";	
-end Interruption_Modem;
-
-thread implementation Interruption_Modem.Impl
-properties
 	Period=> 100 ms;-- a verifier
 end Interruption_Modem.Impl;
 
@@ -832,8 +919,6 @@ features
 	Trans_MCU0_Output: out event data port Data_Types::Inter_mcu_msg.Generic;
 	-- donnees transmies a la station sol
 	Trans_Sol_Output : out event data port Data_Types::Inter_mcu_msg.Generic;
-properties
-	Source_Text => "autopilot/mainloop.c";
 end Nav_Stab_Control_Proc;
 
 process implementation Nav_Stab_Control_Proc.Impl
@@ -890,7 +975,8 @@ modes
 	manual-[Ctrl_By_RC_Th.RC_Evt_Output]->auto;
 	auto-[GPS_Evt_Input]->manual;
 	manual-[Ctrl_By_RC_Th.RC_Evt_Output,GPS_Evt_Input]->home;
-	
+properties
+	Source_Text => "autopilot/mainloop.c";	
 end Nav_Stab_Control_Proc.Impl;
 
 processor Proc_MCU0
