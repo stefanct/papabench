@@ -238,7 +238,7 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="58" value="58" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="52" value="52" base="10"/>
       </propertyAssociation>
     </properties>
     <connections>
@@ -266,7 +266,7 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="66" value="66" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="54" value="54" base="10"/>
       </propertyAssociation>
     </properties>
     <connections>
@@ -294,7 +294,7 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="74" value="74" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="56" value="56" base="10"/>
       </propertyAssociation>
     </properties>
     <connections>
@@ -322,7 +322,7 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="82" value="82" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="58" value="58" base="10"/>
       </propertyAssociation>
     </properties>
     <connections>
@@ -350,7 +350,7 @@
         <propertyValue xsi:type="property:StringValue" value="&quot;SIGNAL&quot;"/>
       </propertyAssociation>
       <propertyAssociation propertyDefinition="/aadlSpec[@name=AADL_Properties]/propertySet[@name=AADL_Properties]/propertyDefinition[@name=Period]">
-        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="90" value="90" base="10"/>
+        <propertyValue xsi:type="property:IntegerValue" unitLiteral="/aadlSpec[@name=AADL_Project]/propertySet[@name=AADL_Project]/propertyType[@name=Time_Units]/unitLiteral[@name=Ms]" valueString="60" value="60" base="10"/>
       </propertyAssociation>
     </properties>
     <connections>
