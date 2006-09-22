@@ -358,7 +358,7 @@ properties
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-	Period=> 58 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+	Period=> 52 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
 end Interruption_Envoi_Servo.MotorL;
 
 thread implementation Interruption_Envoi_Servo.MotorR
@@ -371,7 +371,7 @@ properties
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-	Period=> 66 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+	Period=> 54 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
 end Interruption_Envoi_Servo.MotorR;
 
 thread implementation Interruption_Envoi_Servo.AileronL
@@ -384,7 +384,7 @@ properties
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-	Period=> 74 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+	Period=> 56 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
 end Interruption_Envoi_Servo.AileronL;
 
 thread implementation Interruption_Envoi_Servo.AileronR
@@ -397,7 +397,7 @@ properties
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-	Period=> 82 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+	Period=> 58 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
 end Interruption_Envoi_Servo.AileronR;
 
 thread implementation Interruption_Envoi_Servo.Rudder
@@ -410,7 +410,7 @@ properties
 	Thread_Properties::Preemption=>Non_Preemptive;	
 	Source_Text => "fly_by_wire/servo.c";
 	Compute_Entrypoint => "SIGNAL";
-	Period=> 90 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
+	Period=> 60 ms;--la periode est egale a periode de Pilotage_Servo_Cdes/6 car on a 6 servos
 end Interruption_Envoi_Servo.Rudder;
 
 
