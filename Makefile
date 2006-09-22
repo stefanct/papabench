@@ -20,7 +20,7 @@
 
 PACKAGE=PapaBench
 VERSION=0.2
-RELEASE=0
+RELEASE=1
 BASE=$(PWD)
 DIST= COPYING AUTHORS README Loops_Bounds.txt Makefile
 DISTDIRS=aadl_sources avr conf sw
@@ -77,7 +77,7 @@ clean:
 
 DISTNAME=$(PACKAGE)-$(VERSION)
 ifneq ($(RELEASE),0)
-DISTNAME+=-$(RELEASE)
+DISTNAME:=$(DISTNAME)-$(RELEASE)
 endif
 
 dist: clean
