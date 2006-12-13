@@ -20,9 +20,15 @@
 
 PACKAGE=PapaBench
 VERSION=0.2
-RELEASE=1
+RELEASE=2
 BASE=$(PWD)
-DIST= COPYING AUTHORS README Loops_Bounds.txt Makefile
+DIST= \
+	COPYING \
+	AUTHORS \
+	README \
+	Loops_Bounds.txt \
+	PapaBench_for_wcet.txt \
+	Makefile
 DISTDIRS=aadl_sources avr conf sw
 
 

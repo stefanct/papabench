@@ -28,11 +28,11 @@
 
 # Uncomment the line matching your architecture
 #ARCH	=
- ARCH	= powerpc-linux-gnu-
+#ARCH	= powerpc-linux-gnu-
 
 # Does not yet work with the following architectures
 #ARCH	= powerpc-elf-
-#ARCH	= powerpc-eabi-
+ARCH	= powerpc-eabi-
 #ARCH	= arm-elf-
 
 
