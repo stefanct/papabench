@@ -22,7 +22,8 @@
 
 #include "geometry.h"
 
-#include <math.h>
+//#include <math.h>
+#include "math_papabench.h"
 
 const  struct ellipsoid ellipsoids[ELLIPSOID_NB] = {
    {-168.,  -60.,   320., 6378249.2, 0.0034075495234250643, 0.08248325676},  /* NTF   */

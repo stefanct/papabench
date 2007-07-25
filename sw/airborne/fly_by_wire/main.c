@@ -96,7 +96,7 @@ static void to_autopilot_from_last_radio (void) {
 #endif
 }
 
-void send_data_to_autopilot_task(void)//added 04-05-06
+void send_data_to_autopilot_task(void)
 {
    if ( !SpiIsSelected() && spi_was_interrupted ) 
    {

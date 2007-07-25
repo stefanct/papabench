@@ -27,8 +27,8 @@
 #include <avr/signal.h>
 #include <avr/interrupt.h>
 #include <string.h> 
-#include <math.h>
-
+//#include <math.h>
+#include "math_papabench.h"
 
 #include "flight_plan.h"
 #include "uart.h"
@@ -123,20 +123,18 @@ void parse_gps_msg( void ) {
     }
   }
 #endif
-
-
-
 }
 
 
 uint8_t gps_nb_ovrn;
 
 
-static inline void parse_ubx( uint8_t c ) {
-  if (ubx_status < GOT_PAYLOAD) {
+static void parse_ubx( uint8_t c ) {
+   if (ubx_status < GOT_PAYLOAD) {
     ck_a += c;
     ck_b += ck_a;
   }
+/*#ifdef WITH_SWITCH
   switch (ubx_status) {
   case UNINIT:
     if (c == UBX_SYNC1)
@@ -151,7 +149,7 @@ static inline void parse_ubx( uint8_t c ) {
     break;
   case GOT_SYNC2:
     if (gps_msg_received) {
-      /* Previous message has not yet been parsed: discard this one */
+      // Previous message has not yet been parsed: discard this one 
       gps_nb_ovrn++;
       goto error;
     }
@@ -192,6 +190,71 @@ static inline void parse_ubx( uint8_t c ) {
     goto restart;
     break;
   }
+#else */
+  if (ubx_status == UNINIT)
+  {
+    if (c == UBX_SYNC1)
+      ubx_status++;
+  }
+  else if (ubx_status == GOT_SYNC1)
+  {
+    if (c != UBX_SYNC2)
+      goto error;
+    ck_a = 0;
+    ck_b = 0;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_SYNC2)
+  {
+    if (gps_msg_received) {
+      /* Previous message has not yet been parsed: discard this one */
+      gps_nb_ovrn++;
+      goto error;
+    }
+    ubx_class = c;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_CLASS)
+  {
+    ubx_id = c;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_ID)
+  {
+    ubx_len = c;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_LEN1)
+  {
+    ubx_len |= (c<<8);
+    if (ubx_len > UBX_MAX_PAYLOAD)
+      goto error;
+    ubx_msg_idx = 0;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_LEN2)
+  {
+    ubx_msg_buf[ubx_msg_idx] = c;
+    ubx_msg_idx++;
+    if (ubx_msg_idx >= ubx_len) {
+      ubx_status++;
+    }
+  }
+  else if (ubx_status == GOT_PAYLOAD)
+  {
+    if (c != ck_a)
+      goto error;
+    ubx_status++;
+  }
+  else if (ubx_status == GOT_CHECKSUM1)
+  {
+    if (c != ck_b)
+      goto error;
+    gps_msg_received = TRUE;
+    goto restart;
+  }
+  else {}
+//#endif
   return;
  error:  
  restart:
@@ -204,4 +267,3 @@ ReceiveUart0(parse_ubx);
 #else
 ReceiveUart1(parse_ubx);
 #endif
-

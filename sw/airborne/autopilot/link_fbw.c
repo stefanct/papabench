@@ -64,7 +64,7 @@ void link_fbw_send(void) {
 
 void link_fbw_on_spi_it( void ) {
   /* setup OCR1A to pop in 200 clock cycles */
-  /* this leaves time for the slave (fbw) */
+  /* this leaves time for the slave (fbw)   */
   /* to process the byte we've sent and to  */
   /* prepare a new one to be sent           */
   OCR1A = TCNT1 + 200;

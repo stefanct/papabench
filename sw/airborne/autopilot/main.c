@@ -26,7 +26,8 @@
  *
  */
 #include <inttypes.h>
-#include <math.h>
+//#include <math.h>
+#include "math_papabench.h"
 
 #include "link_autopilot.h"
 
@@ -72,10 +73,10 @@ static bool_t low_battery = FALSE;
 float slider_1_val, slider_2_val;
 
 bool_t launch = FALSE;
-
-
-#define Min(x, y) (x < y ? x : y)
-#define Max(x, y) (x > y ? x : y)
+static uint8_t boot = TRUE;
+static uint8_t count;
+//#define Min(x, y) (x < y ? x : y)
+//#define Max(x, y) (x > y ? x : y)
 
 
 #define NO_CALIB               0	/**< \enum No calibration state */
@@ -94,6 +95,7 @@ bool_t launch = FALSE;
  */
 inline void ground_calibrate( void ) {
   static uint8_t calib_status = NO_CALIB;
+/*#ifdef WITH_SWITCH
   switch (calib_status) {
   case NO_CALIB:
     if (cputime < MAX_DELAY_FOR_CALIBRATION && pprz_mode == PPRZ_MODE_AUTO1 ) {
@@ -113,6 +115,27 @@ inline void ground_calibrate( void ) {
   case CALIB_DONE:
     break;
   }
+#else*/
+if(calib_status == NO_CALIB)
+{
+    if (cputime < MAX_DELAY_FOR_CALIBRATION && pprz_mode == PPRZ_MODE_AUTO1 ) {
+      calib_status = WAITING_CALIB_CONTRAST;
+      DOWNLINK_SEND_CALIB_START();
+    }
+}
+else if (calib_status == WAITING_CALIB_CONTRAST)
+{
+    if (STICK_PUSHED(from_fbw.channels[RADIO_ROLL])) {
+      ir_gain_calib();
+      estimator_rad_of_ir = ir_rad_of_ir;
+      DOWNLINK_SEND_RAD_OF_IR(&estimator_ir, &estimator_rad, &estimator_rad_of_ir, &ir_roll_neutral, &ir_pitch_neutral);
+      calib_status = CALIB_DONE;
+      DOWNLINK_SEND_CALIB_CONTRAST(&ir_contrast);
+    }
+}
+else {}
+
+//#endif
 }
 
 
@@ -260,19 +283,47 @@ uint8_t ticks_last_est; // 20Hz
  *  \brief Send a serie of initialisation messages followed by a stream of periodic ones\n
  * Called at 20Hz.
  */
-void reporting_task( void ) {
-  static uint8_t boot = TRUE;
 
+void send_boot(void){
   /** initialisation phase during boot */
   if (boot) {
       DOWNLINK_SEND_BOOT(&version);
       DOWNLINK_SEND_RAD_OF_IR(&estimator_ir, &estimator_rad, &estimator_rad_of_ir, &ir_roll_neutral, &ir_pitch_neutral);
       boot = FALSE;
   }
-  /** then report periodicly */
-  else {
-    PeriodicSend();
+}
+void send_attitude(void){ //500ms
+  if(!boot){
+    count++;
+    if (count == 250) count = 0;
+    if (count % 5 == 0) 
+       PERIODIC_SEND_ATTITUDE(); 
   }
+}
+  
+void send_adc(void){  //500ms
+  if(!boot){ if (count % 5 == 1) PERIODIC_SEND_ADC();}
+}
+void send_settings(void){ //500ms
+  if(!boot){if (count % 5 == 2) PERIODIC_SEND_SETTINGS();}
+}
+void send_desired(void){  //1000ms
+  if(!boot){ if (count % 10 == 3) PERIODIC_SEND_DESIRED();}
+}
+void send_bat(void){  //2000ms
+  if(!boot){ if (count % 20 == 8) PERIODIC_SEND_BAT();}
+}
+void send_climb(void){  //2000ms
+  if(!boot){ if (count % 20 == 18) PERIODIC_SEND_CLIMB_PID();}
+}
+void send_mode(void){  //5000ms
+  if(!boot){ if (count % 50 == 9) PERIODIC_SEND_PPRZ_MODE();}
+}
+void send_debug(void){  //5000ms
+  if(!boot){ if (count % 50 == 29) PERIODIC_SEND_DEBUG();}
+}
+void send_nav_ref(void){  //10000ms
+  if(!boot){ if (count % 100 == 49) PERIODIC_SEND_NAVIGATION_REF();}
 }
 
 /** \fn inline uint8_t inflight_calib_mode_update ( void )
@@ -342,7 +393,7 @@ void radio_control_task( void ) {
 /** \fn void navigation_task( void )
  *  \brief Compute desired_course
  */
-void navigation_task( void ) {
+void navigation_update( void ) {
 
   /* Default to keep compatibility with previous behaviour */
   lateral_mode = LATERAL_MODE_COURSE;
@@ -350,17 +401,23 @@ void navigation_task( void ) {
     nav_home();
   else
     nav_update();
+}
+
+void send_nav_values(void){
   
   DOWNLINK_SEND_NAVIGATION(&nav_block, &nav_stage, &estimator_x, &estimator_y, &desired_course, &dist2_to_wp, &course_pgain, &dist2_to_home);
+}
+
+void course_run(void){
   
   if (pprz_mode == PPRZ_MODE_AUTO2 || pprz_mode == PPRZ_MODE_HOME) 
   {
     if (lateral_mode >= LATERAL_MODE_COURSE)
       course_pid_run(); /* aka compute nav_desired_roll */
     desired_roll = nav_desired_roll;
-  }
-    
+  }  
 }
+
 void altitude_control_task(void)
 {
 	if (pprz_mode == PPRZ_MODE_AUTO2 || pprz_mode == PPRZ_MODE_HOME) {
@@ -434,6 +491,7 @@ void periodic_task( void ) {
     if (vsupply < LOW_BATTERY) t++; else t = 0;
     low_battery |= (t >= LOW_BATTERY_DELAY);
   }
+/*#ifdef WITH_SWITCH
   switch(_4Hz) {
   case 0:
     estimator_propagate_state();
@@ -460,6 +518,48 @@ void periodic_task( void ) {
   default:
     fatal_error_nb++;
   }
+#else */
+if (_4Hz == 0)
+{
+    estimator_propagate_state();
+    /*navigation_task */
+    navigation_update();
+    send_nav_values();
+    course_run();
+    /*end navigation*/
+    altitude_control_task();
+    climb_control_task();
+}
+
+if(_20Hz == 0)
+{}
+else if (_20Hz == 1)
+{
+    static uint8_t odd;
+    odd++;
+    if (odd & 0x01)
+    {
+	/*reporting_task()*/
+	send_boot();
+	send_attitude();
+   	send_adc();  
+	send_settings();
+	send_desired();
+	send_bat();
+	send_climb();
+	send_mode();
+	send_debug();
+	send_nav_ref();
+    }
+}
+else if(_20Hz == 2)
+{
+    stabilisation_task();
+    link_fbw_send();
+}
+else
+    fatal_error_nb++;
+//#endif
 }
 
 void stabilisation_task(void)
@@ -476,7 +576,8 @@ void stabilisation_task(void)
     // Code for camera stabilization, FIXME put that elsewhere
     to_fbw.channels[RADIO_GAIN1] = TRIM_PPRZ(MAX_PPRZ/0.75*(-estimator_phi));
 }
-void receive_gps_data_task(void)
+
+/*void receive_gps_data_task(void)
 {
 	parse_gps_msg();
       	gps_msg_received = FALSE;
@@ -485,7 +586,7 @@ void receive_gps_data_task(void)
 		use_gps_pos();
 		gps_pos_available = FALSE;
       	}
-}
+}*/
 /** \fn void use_gps_pos( void )
  *  \brief use GPS
  */
@@ -496,13 +597,26 @@ void receive_gps_data_task(void)
  * launch to true (which is not set in non auto launch. Then call
  * \a DOWNLINK_SEND_TAKEOFF
  */
-void use_gps_pos( void ) {
-  DOWNLINK_SEND_GPS(&gps_mode, &gps_utm_east, &gps_utm_north, &gps_fcourse, &gps_falt, &gps_fspeed,&gps_fclimb, &gps_ftow);
-  estimator_update_state_gps();
-  DOWNLINK_SEND_RAD_OF_IR(&estimator_ir, &estimator_rad, &estimator_rad_of_ir, &ir_roll_neutral, &ir_pitch_neutral);
-  if (!estimator_flight_time && (estimator_hspeed_mod > MIN_SPEED_FOR_TAKEOFF)) {
-    estimator_flight_time = 1;
-    launch = TRUE; /* Not set in non auto launch */
-    DOWNLINK_SEND_TAKEOFF(&cputime);
+void send_gps_pos( void ) {
+  gps_msg_received = FALSE;
+  if (gps_pos_available){
+     DOWNLINK_SEND_GPS(&gps_mode, &gps_utm_east, &gps_utm_north, &gps_fcourse, &gps_falt, &gps_fspeed,&gps_fclimb, &gps_ftow);
+     estimator_update_state_gps();
+  }
+}
+
+void send_radIR(void){
+  if (gps_pos_available)
+     DOWNLINK_SEND_RAD_OF_IR(&estimator_ir, &estimator_rad, &estimator_rad_of_ir, &ir_roll_neutral, &ir_pitch_neutral);
+}
+
+void send_takeOff(void){
+  if (gps_pos_available){
+     if (!estimator_flight_time && (estimator_hspeed_mod > MIN_SPEED_FOR_TAKEOFF)) {
+        estimator_flight_time = 1;
+        launch = TRUE; /* Not set in non auto launch */
+        DOWNLINK_SEND_TAKEOFF(&cputime);
+     }
+     gps_pos_available = FALSE; 
   }
 }

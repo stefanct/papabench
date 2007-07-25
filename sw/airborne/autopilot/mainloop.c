@@ -71,7 +71,11 @@ int main( void )
       periodic_task();
     if (gps_msg_received) 
     {
-	receive_gps_data_task();
+	/*receive_gps_data_task()*/
+	parse_gps_msg();
+	send_gps_pos();
+        send_radIR();
+        send_takeOff();
     }
     if (link_fbw_receive_complete) {
       link_fbw_receive_complete = FALSE;

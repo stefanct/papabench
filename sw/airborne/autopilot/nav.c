@@ -24,7 +24,7 @@
 
 #define NAV_C
 
-#include <math.h>
+#include "math_papabench.h"
 
 #include "nav.h"
 #include "estimator.h"
@@ -51,7 +51,7 @@ float stage_time_ds;
 #define GotoBlock(b) { nav_block=b; InitBlock(); }
 
 #define Stage(s) case s: nav_stage=s;
-#define InitStage() { last_x = estimator_x; last_y = estimator_y; stage_time = 0; stage_time_ds = 0; return; }
+#define InitStage() { last_x = estimator_x; last_y = estimator_y; stage_time = 0; stage_time_ds = 0.0; return; }
 #define NextStage() { nav_stage++; InitStage() }
 #define NextStageFrom(wp) { last_wp = wp; NextStage() }
 #define GotoStage(s) { nav_stage = s; InitStage() }
@@ -66,7 +66,7 @@ static bool_t approaching(uint8_t);
 static inline void fly_to_xy(float x, float y);
 static void fly_to(uint8_t wp);
 static void route_to(uint8_t last_wp, uint8_t wp);
-static void glide_to(uint8_t last_wp, uint8_t wp);
+//static void glide_to(uint8_t last_wp, uint8_t wp);
 
 #define MIN_DX ((int16_t)(MAX_PPRZ * 0.05))
 
@@ -76,7 +76,7 @@ static void glide_to(uint8_t last_wp, uint8_t wp);
 
 static float qdr; /* Degrees from 0 to 360 */
 
-#define CircleXY(x,y,radius) { float alpha = atan2(estimator_y - y, estimator_x - x);float alpha_carrot = alpha + CARROT / -radius * estimator_hspeed_mod; fly_to_xy(x+cos(alpha_carrot)*fabs(radius),y+sin(alpha_carrot)*fabs(radius)); qdr = DegOfRad(M_PI/2 - alpha_carrot); NormCourse(qdr);}
+#define CircleXY(x,y,radius) { float alpha = atan2(estimator_y - y, estimator_x - x);float alpha_carrot = alpha + CARROT / (-radius * estimator_hspeed_mod); fly_to_xy(x+cos(alpha_carrot)*fabs(radius),y+sin(alpha_carrot)*fabs(radius)); qdr = DegOfRad(M_PI/2 - alpha_carrot); NormCourse(qdr);}
 
 #define MAX_DIST_CARROT 250.
 #define MIN_HEIGHT_CARROT 50.
@@ -88,8 +88,8 @@ static float qdr; /* Degrees from 0 to 360 */
 
 #define And(x, y) ((x) && (y))
 #define Or(x, y) ((x) || (y))
-#define Min(x,y) (x < y ? x : y)
-#define Max(x,y) (x > y ? x : y)
+//#define Min(x,y) (x < y ? x : y)
+//#define Max(x,y) (x > y ? x : y)
 #define Qdr(x) (Min(x, 350) < qdr && qdr < x+10)
 
 #include "flight_plan.h"
@@ -158,11 +158,11 @@ static void route_to(uint8_t _last_wp, uint8_t wp)
   fly_to_xy(last_wp_x + alpha*leg_x, last_wp_y + alpha*leg_y);
 }
 
-static void glide_to(uint8_t _last_wp, uint8_t wp) {
+/*static void glide_to(uint8_t _last_wp, uint8_t wp) {
   float last_alt = waypoints[_last_wp].a;
   desired_altitude = last_alt + alpha * (waypoints[wp].a - last_alt);
   pre_climb = NOMINAL_AIRSPEED * (waypoints[wp].a - last_alt) / leg;
-}
+}*/
 
 static inline void compute_dist2_to_home(void) {
   float ph_x = waypoints[WP_HOME].x - estimator_x;

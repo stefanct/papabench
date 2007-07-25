@@ -150,6 +150,7 @@ void pprz_msg_free(struct PprzMsg* this) {
 }
 
 gboolean pprz_msg_set_field(struct PprzMsg* msg, struct PprzFieldClass* field_class, gconstpointer value) {
+/*#ifdef WITH_SWITCH
   switch (field_class->type) {
   case TYP_UINT_8:
     *(guint8*)(msg->bytes+field_class->offset) = *(guint8*)value;
@@ -178,6 +179,52 @@ gboolean pprz_msg_set_field(struct PprzMsg* msg, struct PprzFieldClass* field_cl
   default:
     g_warning("in ascii of field : unknown type");
   }
+#else*/
+  if(field_class->type == TYP_UINT_8)
+  {
+    *(guint8*)(msg->bytes+field_class->offset) = *(guint8*)value;
+    break;
+  }
+  else if (field_class->type == TYP_UINT_16)
+  {
+    *(guint16*)(msg->bytes+field_class->offset) = *(guint16*)value;
+    break;
+  }
+  else if (field_class->type == TYP_UINT_32)
+  {
+    *(guint32*)(msg->bytes+field_class->offset) = *(guint32*)value;
+    break;
+  }
+  else if (field_class->type == TYP_INT_8)
+  {
+    *(gint8*)(msg->bytes+field_class->offset) = *(gint8*)value;
+    break;
+  }
+  else if(field_class->type == TYP_INT_16)
+  {
+    *(gint16*)(msg->bytes+field_class->offset) = *(gint16*)value;
+    break;
+  }
+  else if (field_class->type == TYP_INT_32)
+  {
+    *(gint32*)(msg->bytes+field_class->offset) = *(gint32*)value;
+    break;
+  }
+  else if (field_class->type == TYP_FLOAT)
+  {
+    *(gfloat*)(msg->bytes+field_class->offset) = *(gfloat*)value;
+    break;
+  }
+  else if (field_class->type == TYP_ARRAY_UINT_8)
+  {
+    //    g_string_append_printf(buf, format, *((gfloat*)data));
+    break;
+  }
+  else 
+  {
+    g_warning("in ascii of field : unknown type");
+  }
+//#endif
   return TRUE;
 }
 
@@ -224,6 +271,7 @@ void pprz_msg_ascii_of_field(struct PprzMsg* msg, struct PprzFieldClass* field_c
   format = field_class->format;
   if(!format) format = type_info[field_class->type].default_format;
   data = msg->bytes + field_class->offset;
+/*#ifdef WITH_SWITCH
   switch (field_class->type) {
   case TYP_UINT_8:
     g_string_append_printf(buf, format, *((guint8*)data));
@@ -252,6 +300,50 @@ void pprz_msg_ascii_of_field(struct PprzMsg* msg, struct PprzFieldClass* field_c
   default:
     g_warning("in ascii of field : unknown type");
   }
+#else*/
+  if(field_class->type == TYP_UINT_8)
+  {
+    g_string_append_printf(buf, format, *((guint8*)data));
+    break;
+  }
+  else if(field_class->type == TYP_UINT_16)
+  {
+    g_string_append_printf(buf, format, *((guint16*)data));
+    break;
+  }
+  else if(field_class->type == TYP_UINT_32)
+  {
+    g_string_append_printf(buf, format, *((guint32*)data));
+    break;
+  }
+  else if(field_class->type == TYP_INT_8)
+  {
+    g_string_append_printf(buf, format, *((gint8*)data));
+    break;
+  }
+  else if(field_class->type == TYP_INT_16)
+  {
+    g_string_append_printf(buf, format, *((gint16*)data));
+    break;
+  }
+  else if(field_class->type == TYP_INT_32)
+  {
+    g_string_append_printf(buf, format, *((gint32*)data));
+    break;
+  }
+  else if(field_class->type == TYP_FLOAT)
+  {
+    g_string_append_printf(buf, format, *((gfloat*)data));
+    break;
+  }
+  else if(field_class->type == TYP_ARRAY_UINT_8)
+  {
+    //    g_string_append_printf(buf, format, *((gfloat*)data));
+    break;
+  }
+  else
+    g_warning("in ascii of field : unknown type");
+//#endif
 }
 
 
@@ -259,6 +351,7 @@ static gboolean field_of_ascii(GList* fields_classes, gchar* line, struct PprzMs
   struct PprzFieldClass* field_class = (struct PprzFieldClass*)fields_classes->data;
   gchar* end_ptr;
   gchar* ptr_field = msg->bytes + field_class->offset;
+/*#ifdef WITH_SWITCH
   switch (field_class->type) {
   case TYP_UINT_8:
     *((guint8*)ptr_field) = (guint8)strtoul(line, &end_ptr, 10);
@@ -286,7 +379,47 @@ static gboolean field_of_ascii(GList* fields_classes, gchar* line, struct PprzMs
   default:
     printf("in field of ascii: unknown type\n");
   }
-  
+#else*/
+if (field_class->type == TYP_UINT_8)
+{
+    *((guint8*)ptr_field) = (guint8)strtoul(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_UINT_16)
+{
+    *((guint16*)ptr_field) = (guint16)strtoul(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_UINT_32)
+{
+    *((guint32*)ptr_field) = (guint32)strtoul(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_INT_8)
+{
+    *((gint8*)ptr_field) = (gint8)strtol(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_INT_16)
+{
+    *((gint16*)ptr_field) = (gint16)strtol(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_INT_32)
+{
+    *((gint32*)ptr_field) = (gint32)strtol(line, &end_ptr, 10);
+    break;
+}
+else if (field_class->type == TYP_FLOAT)
+{
+    *((gfloat*)ptr_field) = (gfloat)strtod(line, &end_ptr);
+    break;
+}
+else if (field_class->type == TYP_ARRAY_UINT_8)
+    break;
+else
+    printf("in field of ascii: unknown type\n");
+//#endif
   if (fields_classes->next)
     return field_of_ascii(fields_classes->next, end_ptr, msg);
   return TRUE;

@@ -114,6 +114,10 @@ extern struct adc_buf buf_bat;
 void periodic_task( void );
 void use_gps_pos(void);
 void radio_control_task(void);
-void receive_gps_data_task(void);//added 4-05-06
-void stabilisation_task(void);//added 4-05-06
+/*receive_gps_data_task */
+void send_gps_pos( void );
+void send_radIR(void);
+void send_takeOff(void);
+/*end receive_gps_data_task*/
+void stabilisation_task(void);
 #endif /* AUTOPILOT_H */

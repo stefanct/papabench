@@ -27,10 +27,11 @@
 #include <avr/signal.h>
 #include <avr/interrupt.h>
 #include <string.h> 
-
+#include "math_papabench.h"
 
 #include "uart.h"
 #include "gps.h"
+
 
 float gps_falt;
 float gps_fspeed;
@@ -141,7 +142,8 @@ static uint8_t  sirf_msg_idx;
 
 
 static inline void parse_sirf( uint8_t c ) {
-  switch (sirf_status) {
+/*#ifdef WITH_SWITCH
+switch (sirf_status) {
   case UNINIT:
     if (c == SIRF_START1)
       sirf_status++;
@@ -183,7 +185,7 @@ static inline void parse_sirf( uint8_t c ) {
     break;
   case GOT_CHECKSUM1:
     sirf_checksum += (c & 0x00FF);
-    /* fixme: check correct */
+    // fixme: check correct 
     sirf_status++;
     break;
   case GOT_CHECKSUM2:
@@ -218,6 +220,97 @@ static inline void parse_sirf( uint8_t c ) {
     break;
 #endif
   }
+#else*/
+if (sirf_status == UNINIT)
+{
+    if (c == SIRF_START1)
+      sirf_status++;
+#ifdef SIMUL
+    if (c == IR_START)
+      sirf_status = GOT_IR_START;
+#endif
+}
+else if (sirf_status == GOT_START1)
+{
+    if (c != SIRF_START2)
+      goto error;
+    sirf_status++;
+}
+else if (sirf_status == GOT_START2)
+{
+    sirf_len = (c<<8) & 0xFF00;
+    sirf_status++;
+}
+else if (sirf_status == GOT_LEN1)
+{
+    sirf_len += (c & 0x00FF);
+    if (sirf_len > SIRF_MAX_PAYLOAD)
+      goto error;
+    sirf_msg_idx = 0;
+    sirf_status++;
+}
+else if (sirf_status == GOT_LEN2)
+{
+    if (sirf_msg_idx==0) {
+      sirf_type = c;
+    }
+    if (sirf_type == SIRF_TYP_EXT_NAV)
+      sirf_msg_buf[sirf_msg_idx] = c;
+    sirf_msg_idx++;
+    if (sirf_msg_idx >= sirf_len) {
+      sirf_status++; 
+    }
+}
+else if (sirf_status == GOT_PAYLOAD)
+{
+    sirf_checksum = (c<<8) & 0xFF00;
+    sirf_status++;
+}
+else if (sirf_status == GOT_CHECKSUM1)
+{
+    sirf_checksum += (c & 0x00FF);
+    /* fixme: check correct */
+    sirf_status++;
+}
+else if (sirf_status == GOT_CHECKSUM2)
+{
+    if (c != SIRF_END1)
+      goto error;
+    sirf_status++; 
+}
+else if (sirf_status == GOT_END1)
+{
+    if (c != SIRF_END2)
+      goto error;
+
+    if (sirf_type == SIRF_TYP_EXT_NAV)
+      gps_msg_received = TRUE;
+    goto restart;
+}
+#ifdef SIMUL
+else if (sirf_status == GOT_IR_START)
+{
+    simul_ir_roll = c << 8;
+    sirf_status++;
+}
+else if (sirf_status == GOT_IR1)
+{
+    simul_ir_roll |= c;
+    sirf_status++;
+}
+else if (sirf_status == GOT_IR2)
+{
+    simul_ir_pitch = c << 8;
+    sirf_status++;
+}
+else if (sirf_status == GOT_IR3)
+{
+    simul_ir_pitch |= c;
+    goto restart;
+}
+#endif
+else {}
+//#endif
   return;
  error:  
   //  modem_putc('r');
@@ -226,6 +319,7 @@ static inline void parse_sirf( uint8_t c ) {
   sirf_status = UNINIT;
   sirf_checksum = 0;
   return;
+
 }
 
 #ifdef SIMUL

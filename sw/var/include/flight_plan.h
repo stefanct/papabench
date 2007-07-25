@@ -25,7 +25,8 @@
 #ifdef NAV_C
 
 static inline void auto_nav(void) {
-  switch (nav_block) {
+/*#ifdef WITH_SWITCH
+switch (nav_block) {
     Block(0) // init
     switch(nav_stage) {
       Label(while_1)
@@ -218,7 +219,288 @@ static inline void auto_nav(void) {
         NextBlock()
     }
 
-  }
+}
+#else*/
+if(nav_block == 0)
+{ // init
+    
+    if (nav_stage == 0) 
+    {
+	Label(while_1)
+	nav_stage=0;
+	if (! (!(estimator_flight_time))) Goto(endwhile_2) 
+	else NextStage(); 
+    }
+    else if (nav_stage == 1)
+    {   Goto(while_1)}
+    else if (nav_stage == 2)
+    {
+	Label(endwhile_2)
+	nav_stage = 2;
+        if ((estimator_flight_time>8)) NextStage() else {
+          desired_course = RadOfDeg(QFU);
+          auto_pitch = FALSE;
+          nav_pitch = 0.150000;
+          vertical_mode = VERTICAL_MODE_AUTO_GAZ;
+          nav_desired_gaz = TRIM_UPPRZ(0.800000*MAX_PPRZ);
+        }
+        return;
+     }
+     else if (nav_stage == 3)
+     {
+	nav_stage = 3;	
+        if ((estimator_z>SECURITY_ALT)) NextStage() else {
+          desired_course = RadOfDeg(QFU);
+          auto_pitch = FALSE;
+          nav_pitch = 0.000000;
+          vertical_mode = VERTICAL_MODE_AUTO_CLIMB;
+          desired_climb = 8.000000;
+        }
+        return;
+     }
+     else if (nav_stage == 4)
+        NextBlock()
+     else { }
+}
+else if (nav_block == 1) // two
+{
+    nav_block = 1;
+    if RcEvent1() 
+	{ GotoBlock(2) }
+    if(nav_stage == 0)
+    {
+       Label(while_3)
+       if (! (TRUE)) Goto(endwhile_4) else NextStage();
+    }
+    else if (nav_stage == 1)
+    {
+	  nav_stage = 1;
+          if (approaching(1)) NextStageFrom(1) else {
+            fly_to(1);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[1].a;
+            pre_climb = 0.;
+          }
+          return;
+     }
+     else if (nav_stage == 2)
+     {
+	  nav_stage = 2;
+          if (approaching(4)) NextStageFrom(4) else {
+            fly_to(4);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[4].a;
+            pre_climb = 0.;
+          }
+          return;
+      }
+      else if (nav_stage == 3)
+      {
+	  nav_stage = 3;
+          Goto(while_3)
+      }
+      else if (nav_stage == 4)
+      {
+        Label(endwhile_4)
+	nav_stage = 4;
+        NextBlock()
+      }
+      else { }
+}
+else if (nav_block == 2) // height
+{
+	nav_block = 2;
+    if RcEvent1() { GotoBlock(3) }
+    
+    if(nav_stage == 0)
+    {
+       Label(while_5)
+       nav_stage = 0;
+       if (! (TRUE)) Goto(endwhile_6) else NextStage();
+    }
+    else if(nav_stage == 1)
+    {
+         nav_stage =1;
+          if (approaching(6)) NextStageFrom(6) else {
+            fly_to(6);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[6].a;
+            pre_climb = 0.;
+          }
+          return;
+     }
+     else if (nav_stage == 2)
+     {
+         nav_stage =2; 
+         if (approaching(1)) NextStageFrom(1) else {
+            fly_to(1);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[1].a;
+            pre_climb = 0.;
+          }
+          return;
+      }
+      else if (nav_stage == 3)
+      {
+	   nav_stage = 3;         
+           if (approaching(2)) NextStageFrom(2) else {
+            route_to(last_wp, 2);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[2].a;
+            pre_climb = 0.;
+          }
+          return;
+       }
+       else if (nav_stage == 4)
+       {
+          nav_stage = 4;
+          if (approaching(3)) NextStageFrom(3) else {
+            fly_to(3);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[3].a;
+            pre_climb = 0.;
+          }
+          return;
+       }
+       else if (nav_stage == 5)
+       {
+          nav_stage =5;
+          if (approaching(4)) NextStageFrom(4) else {
+            fly_to(4);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[4].a;
+            pre_climb = 0.;
+          }
+          return;
+       }
+       else if (nav_stage == 6)
+       {
+          nav_stage =6;
+          if (approaching(5)) NextStageFrom(5) else {
+            route_to(last_wp, 5);
+            auto_pitch = FALSE;
+            nav_pitch = 0.000000;
+            vertical_mode = VERTICAL_MODE_AUTO_ALT;
+            desired_altitude = waypoints[5].a;
+            pre_climb = 0.;
+          }
+          return;
+       }
+       else if (nav_stage == 7)
+       {
+	   nav_stage =7;
+	   Goto(while_5)
+	}
+       
+       else if (nav_stage == 8){
+	  Label(endwhile_6)
+	  nav_stage =8;
+          NextBlock();
+       }
+       else { }
+}
+else if (nav_block == 3) // xyz
+{
+    nav_block = 3;
+    if RcEvent1() { GotoBlock(4) }
+    if(nav_stage == 0)
+    {
+        nav_stage = 0;
+        Goto3D(50)
+        return;
+    }
+    else if (nav_stage == 1)
+    {
+        nav_stage = 1;
+        NextBlock()
+    }
+    else { }
+}
+else if (nav_block == 4)
+{
+    nav_block = 4;
+    if RcEvent1() { GotoBlock(5) }
+    if(nav_stage == 0)
+    {
+        nav_stage = 0;
+        auto_pitch = FALSE;
+        nav_pitch = 0.000000;
+        vertical_mode = VERTICAL_MODE_AUTO_ALT;
+        desired_altitude = waypoints[0].a;
+        pre_climb = 0.;
+        Circle(0, 150);
+        return;
+    }
+    else if (nav_stage == 1)
+    {
+        nav_stage =1;
+        NextBlock()
+    }
+    else {}
+}
+else if (nav_block == 5)
+{
+    nav_block = 5;
+    if RcEvent1() { GotoBlock(1) }
+    if(nav_stage == 0) {
+       Label(while_7) 
+       nav_stage = 0;
+      if (! (TRUE)) Goto(endwhile_8) else NextStage();}
+     
+    else if (nav_stage == 1)
+    {
+        nav_stage =1;
+        auto_pitch = FALSE;
+        nav_pitch = 0.000000;
+        vertical_mode = VERTICAL_MODE_AUTO_ALT;
+        desired_altitude = waypoints[1].a;
+        pre_climb = 0.;
+        Circle(1, 100);
+        if (Qdr(0)) NextStage();
+        return;
+    }
+    else if (nav_stage == 2)
+    {
+         nav_stage = 2;
+          auto_pitch = FALSE;
+          nav_pitch = 0.000000;
+          vertical_mode = VERTICAL_MODE_AUTO_ALT;
+          desired_altitude = waypoints[4].a;
+          pre_climb = 0.;
+          Circle(4, 100);
+          if (Qdr(180)) NextStage();
+          return;
+    }
+    else if (nav_stage == 3) 
+    {
+	  nav_stage = 3;
+          Goto(while_7)
+    }
+    else if (nav_stage == 4)
+    {
+	Label(endwhile_8)
+	nav_stage = 4;
+        NextBlock()
+    }
+    else { }
+}
+else { }
+
+//#endif
 }
 #endif // NAV_C
 
