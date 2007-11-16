@@ -26,30 +26,27 @@
 # Edit the configuration part to suit your local install
 #
 
-# Uncomment the line matching your architecture
-#ARCH	=
-#ARCH	= powerpc-linux-gnu-
-
-# Does not yet work with the following architectures
-#ARCH	= powerpc-elf-
-ARCH	= powerpc-eabi-
-#ARCH	= arm-elf-
-
-
-CC		= $(ARCH)gcc
-LD		= $(CC) 
-SIZE		= $(ARCH)size
-OBJCOPY         = $(ARCH)objcopy
+# Configuration
+PAPARAZZI_DIR = \"$(BASE)/\"
+ATMELBIN = /usr/bin
+ATMEL_INCLUDES = -I $(BASE)/avr/include/
+UISPBIN=/usr/bin
+PROG_PORT = /dev/parport0
+USB_PROG_PORT = /dev/ttyUSB1
 
 
-SERIAL_FLAGS	=							\
-	-dprog=avr910							\
-	-dpart=auto							\
-	-dserial=/dev/ttyS0						\
-	-dspeed=38400							\
+# Architecture dependent
+include $(BASE)/conf/Makefile.local
+-include $(BASE)/conf/$(ARCH)$(MACH)conf
 
-ISP_FLAGS	=							\
-	-dlpt=$(PROG_PORT) -dprog=stk200 -v=3				\
+SERIAL_FLAGS =	\
+	-dprog=avr910 \
+	-dpart=auto	\
+	-dserial=/dev/ttyS0	\
+	-dspeed=38400
+
+ISP_FLAGS = \
+	-dlpt=$(PROG_PORT) -dprog=stk200 -v=3
 
 USB_FLAGS       =
 	-dserial=$(USB_PROG_PORT) \
@@ -68,23 +65,30 @@ UISP_FLAGS	= $(ISP_FLAGS)
 #
 
 
-CFLAGS		=							\
+CFLAGS = \
 	-W -Wall \
-	$(ATMEL_INCLUDES)					  	\
-	$(INCLUDES)					  	\
-	-Wall 								\
-	-Wstrict-prototypes						\
-	$(LOCAL_CFLAGS)							\
-	-O2								\
+	$(ATMEL_INCLUDES) \
+	$(INCLUDES) \
+	-Wall \
+	-Wstrict-prototypes	\
+	$(LOCAL_CFLAGS)	\
+	-O2	\
+	-nostdinc \
+	$(ARCH_CFLAGS) \
+	$(USER_CFLAGS)
+	
 
-#LDFLAGS		=	-lm						\
+LDFLAGS = \
+	$(ARCH_STDFLAGS) \
+	$(ARCH_LDFLAGS) \
+	$(USER_LDLFLAGS)
 
 #
 # General rules
 #
 
 all:									\
-	$(TARGET).elf
+	$(TARGET).elf $(TARGET).dis
 
 compile: $(TARGET).elf							\
 
@@ -135,6 +139,9 @@ check_fuses: check_arch
 %.hex: %.elf
 	 $(OBJCOPY) -O ihex -R .eeprom $< $@
 
+%.dis: %.elf
+	$(OBJDUMP) $< > $@
+
 
 %.install: %.hex check_arch
 	# stk200 needs to be erased first
@@ -152,7 +159,8 @@ check_arch :
 	@if ($(UISP) $(UISP_FLAGS) 2>&1 | tr '[:upper:]' '[:lower:]' | grep $(ARCH)); then : ; else echo "-> Wrong architecture (mcu0 vs mcu1 ?)"; exit 1; fi
 
 avr_clean:
-	rm -f *.hex *.elf *.out core *.o *.a *~ *.cm* *.s .depend
+	rm -f .depend $($(TARGET).srcs:.c=.s)
+	rm -f $(TARGET).elf $(TARGET).elf.s $($(TARGET).srcs:.c=.o)
 
 
 #
