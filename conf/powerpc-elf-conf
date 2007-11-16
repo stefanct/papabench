@@ -1,5 +1,5 @@
 
-#ARCH_CRT0=\
+ARCH_CRT0=\
 	$(BASE)/sw/lib/crt0/powerpc-elf-crt0.c
 
 ARCH_SOURCES=
