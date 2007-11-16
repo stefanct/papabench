@@ -19,9 +19,9 @@
 # Boston, MA 02111-1307, USA.  
 
 PACKAGE=PapaBench
-VERSION=0.2
-RELEASE=2
-BASE=$(PWD)
+VERSION=0.3
+RELEASE=0
+export BASE=$(PWD)
 DIST= \
 	COPYING \
 	AUTHORS \
@@ -45,6 +45,8 @@ SIMULATOR=sw/simulator
 TOOLS=sw/tools
 MAKE=make
 
+
+# Rules
 all : fbw ap 
 
 configure : configurator
@@ -54,19 +56,19 @@ lib:
 	cd $(LIB)/c; $(MAKE)
 
 fbw fly_by_wire : 
-	cd $(FBW); $(MAKE) BASE=$(BASE) all
+	cd $(FBW); $(MAKE) all
 
 ap autopilot : 
-	cd $(AP); $(MAKE) BASE=$(BASE) all
+	cd $(AP); $(MAKE) all
 
 upload_fbw: fbw
-	cd $(FBW); $(MAKE) BASE=$(BASE) upload
+	cd $(FBW); $(MAKE) upload
 
 upload_ap: ap
-	cd $(AP); $(MAKE) BASE=$(BASE) upload
+	cd $(AP); $(MAKE) upload
 
 erase_fbw:
-	cd $(FBW); $(MAKE) BASE=$(BASE) erase
+	cd $(FBW); $(MAKE) erase
 
 erase_ap:
 	cd $(AP); $(MAKE) erase
@@ -77,10 +79,12 @@ doxygen:
 	mkdir -p dox
 	doxygen Doxyfile
 
-clean: 
-	find . -name Makefile -mindepth 2 -exec sh -c '$(MAKE) -C `dirname {}` $@' \; 
-	find . -name '*~' -exec rm -f {} \;
+clean:
+	cd $(FBW); $(MAKE) clean
+	cd $(AP); $(MAKE) clean
 
+
+# Distribution building
 DISTNAME=$(PACKAGE)-$(VERSION)
 ifneq ($(RELEASE),0)
 DISTNAME:=$(DISTNAME)-$(RELEASE)
