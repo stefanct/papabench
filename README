@@ -23,8 +23,8 @@ PapaBench is bound only to the embedded part of Paparazzi and to the default air
 The first generation of the embedded system enables us to save the C header files found in sw/var/include directory. These headers are generated from XML files containing the configuration of the airframes, the radio commands and the flight plan.
 Then we analyzed the static sources and the generated headers in order to create PapaBench. We have excluded the sources of the ground station in charge of  monitoring the flight, display statistics, programming the mission and generating the embedded system sources.
 
-Directories description:
------------------------
+Top Directoriy description
+--------------------------
 aadl_sources  :contains the aadl description of PapaBench. Their is four descriptions of the benchmark 
 	       since we analyzed four cases for the periodicity of tasks and interruptions.
 		- Version 1: Tasks and Interruptions are periodic non preemptive (PnP)
@@ -45,7 +45,7 @@ pcg_autopilot.txt and pcg_fbw.txt  :provide the Program Call Graph for the autop
 
 Compilation details
 -------------------
-Our objective was to enable a user to compile the benchmark without the requirement of the whole Paparazzi building environment and for different architectures. Until now, we have experimented the compilation for PowerPC and x86 architectures using the gcc compiler suite but it should be easy to adapt PapaBench to other configurations.
+Our objective was to enable a user to compile the benchmark without the requirement of the whole Paparazzi building environment and for different architectures. Until now, we have experimented the compilation for PowerPC, x86 and ARM architectures using the gcc compiler suite but it should be easy to adapt PapaBench to other configurations.
 
 ***********************************************
 *                IMPORTANT                    *
@@ -59,9 +59,9 @@ To Compile PapaBench
 
   1) Extract the archive
 
-  2) HAVE A LOOK at conf/Makefile.local 
-	- set the PAPARAZZI_HOME environment variable to the top directory.
-	- set the AMTEL_INCLUDES variable to: -I (path of the top directory)/avr/include 
-  3) Edit the conf/Makefile.avr to set the CC variable to the compilation command (ex: gcc, powerpc-linux-gnu-gcc,...)
+  2) HAVE A LOOK at conf/Makefile.local
+    - select or configure the ARCH (architecture) and MACH (machine) variables in "conf/Makefile.local",
+    - configure your compiler tools,
+    - configure your CFLAGS and LDFLAGS variable for compilation and linkage options. 
 
-  4) "make" in top directory should compile everything
+  3) "make" in top directory should compile everything
