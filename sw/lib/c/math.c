@@ -1,12 +1,9 @@
 /*
- * Paparazzi mcu0 adc functions
+ * Math library emulation functions
  *  
- * Copied from autopilot (autopilot.sf.net) thanx alot Trammell
+ * Copyright (C) 2007 IRIT - UPS <casse@irit.fr>
  *
- * Copyright (C) 2002 Trammell Hudson <hudson@rotomotion.com>
- * Copyright (C) 2003 Pascal Brisset, Antoine Drouin
- *
- * This file is part of paparazzi.
+ * This file is part of papabench.
  *
  * paparazzi is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +16,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with paparazzi; see the file COPYING.  If not, write to
+ * along with papabench; see the file COPYING.  If not, write to
  * the Free Software Foundation, 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA. 
  *
  */
-#include <math_papabench.h>
+#include <math.h>
 
 double pp_atan2(double x, double y)
 {

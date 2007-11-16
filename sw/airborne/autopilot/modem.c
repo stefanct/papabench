@@ -26,7 +26,7 @@
 #include <avr/io.h>
 #include <avr/signal.h>
 #include <avr/interrupt.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include "modem.h"
 #include "std.h"
 

@@ -26,8 +26,7 @@
  *
  */
 #include <inttypes.h>
-//#include <math.h>
-#include "math_papabench.h"
+#include <math.h>
 
 #include "link_autopilot.h"
 

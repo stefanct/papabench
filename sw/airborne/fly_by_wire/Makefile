@@ -47,17 +47,18 @@ CTL_BRD_FLAGS=-DCTL_BRD_V1_1
 endif
 
 
-$(TARGET).srcs	=							\
-	main.c								\
-	ppm.c								\
-	servo.c								\
-	spi.c								\
-	uart.c                                                          \
-	adc_fbw.c                                                       \
+$(TARGET).srcs = \
+	$(ARCH_CRT0) \
+	main.c \
+	ppm.c \
+	servo.c \
+	spi.c \
+	uart.c \
+	adc_fbw.c \
+	$(ARCH_SOURCES)
 
 
-include ../../../conf/Makefile.local
-include ../../../conf/Makefile.avr
+include $(BASE)/conf/Makefile.std
 
 fbw.install : warn_conf
 
@@ -71,7 +72,8 @@ warn_conf :
 
 
 main.o .depend : $(VARINCLUDE)/radio.h $(VARINCLUDE)/airframe.h
+ppm.s : $(VARINCLUDE)/radio.h
 
 clean : avr_clean
 
-ppm.s : $(VARINCLUDE)/radio.h
+

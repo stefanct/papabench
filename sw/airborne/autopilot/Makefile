@@ -41,23 +41,25 @@ INCLUDES = -I $(FBW) -I ../../include -I $(VARINCLUDE)
 GPS = gps_ubx.c
 GPS_FLAGS=-DUBX
 
-$(TARGET).srcs	=							\
-	main.c								\
-	modem.c								\
-	link_fbw.c							\
-	spi.c								\
-	adc.c								\
-	$(GPS)								\
-	infrared.c							\
-	pid.c								\
-	nav.c								\
-	uart.c                                                          \
-        estimator.c                                                     \
-	if_calib.c							\
-	mainloop.c
+$(TARGET).srcs = \
+	$(ARCH_CRT0) \
+	main.c \
+	modem.c \
+	link_fbw.c \
+	spi.c \
+	adc.c \
+	$(GPS) \
+	infrared.c \
+	pid.c \
+	nav.c \
+	uart.c \
+	estimator.c	\
+	if_calib.c \
+	mainloop.c \
+	../../lib/c/math.c \
+	$(ARCH_SOURCES)
 
-include ../../../conf/Makefile.local
-include ../../../conf/Makefile.avr
+include $(BASE)/conf/Makefile.std
 
 autopilot.install : warn_conf
 
@@ -78,4 +80,3 @@ gps_ubx.o : $(VARINCLUDE)/ubx_protocol.h
 if_calib.o : $(VARINCLUDE)/inflight_calib.h
 
 clean : avr_clean
-	rm -f *.out *.cm* messages.h flight_plan.h ubx_protocol.h inflight_calib.h

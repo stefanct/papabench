@@ -24,7 +24,7 @@
 
 #define NAV_C
 
-#include "math_papabench.h"
+#include "math.h"
 
 #include "nav.h"
 #include "estimator.h"

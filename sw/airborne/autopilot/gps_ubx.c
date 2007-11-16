@@ -26,9 +26,8 @@
 #include <avr/io.h>
 #include <avr/signal.h>
 #include <avr/interrupt.h>
-#include <string.h> 
-//#include <math.h>
-#include "math_papabench.h"
+//#include <string.h> 
+#include <math.h>
 
 #include "flight_plan.h"
 #include "uart.h"
