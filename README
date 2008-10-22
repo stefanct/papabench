@@ -36,7 +36,7 @@ avr  : holds the header files of the AVR C libc project
 
 conf : is the configuration directory
 
-sw   : has to sub-directories one for Fly_by_wire source code and the other for autopilot source code
+sw   : has two sub-directories one for Fly_by_wire source code and the other for autopilot source code
 
 Loops_Bounds.txt  : gives for each loop encountered in the sources its maximum iteration number.
 
@@ -65,3 +65,39 @@ To Compile PapaBench
     - configure your CFLAGS and LDFLAGS variable for compilation and linkage options. 
 
   3) "make" in top directory should compile everything
+
+The application
+---------------
+
+In the default configuration, Papabench produces executable files representing two programs running on two processors. They may be found here:
+  - Fly-By-Wire:	PAPABENCH/sw/airborne/fly_by_wire/fbw.elf
+  - Autpilot:		PAPABENCH/sw/airborne/autopilot/autopilot.elf
+
+Each application application starts by calling the main function that contains a static scheduling invoking the different tasks with the different frequencies. Each task has an entry point represented as a C function. The table below show the different tasks and their frequencies.
+
+FLY-BY-WIRE
+  - check_failsafe_task (20Hz)
+  - check_mega128_values_task (20Hz)
+  - send_data_to_autopilot_task (40Hz)
+  - servo_transmit (20Hz)
+  - test_ppm_task (40Hz)
+  - __vector_5 (40Hz) -- interruption
+  - __vector_6 (20Hz) -- interruption (5 subsequent invocation each 2ms)
+  - __vector_10 (40Hz) -- interruption
+
+AUTOPILOT
+  - altitude_control_task (4Hz)
+  - climb_control_task (4Hz)
+  - link_fbw_send (20Hz)
+  - navigation_task (4Hz)
+  - radio_control_task (40Hz)
+  - receive_gps_data_task (4Hz)
+  - reporting_task (10Hz)
+  - stabilisation_task (20Hz)
+  - __vector_5 (10Hz) -- interruption
+  - __vector_12 (20Hz) -- interruption
+  - __vector_17 (20Hz) -- interruption
+  - __vector_30 (4Hz) -- interruption
+  
+
+A more formal description of the tasks and their temporal properties expressed in AADL is given in directory "aadl_sources".

@@ -14,7 +14,7 @@ To prove the real-time behaviour of the system, we have to measure the Worst-Cas
 
 
 
-Papabench: 13 tasks = 13 functions = 13 WCETs
+Papabench: 19 tasks = 19 functions = 19 WCETs
 ---------------------------------------------
 
 As presented in the previous section, PapaBench is built around two programs representing an actual real-time system running on two different processors. Each program implements an infinite control loop that calls the tasks performing the UAV drive.
@@ -28,39 +28,40 @@ The tables below shows the list of tasks and their matching C function entry poi
     * FBW
 
 Identifier  C Entry Point Function 	     Description
-T1 	        test_ppm_task                Decodes the Radio-Command orders
-T2 	        send_data_to_autopilot_task  Send information to MCU0
-T3          check_mega128_values_task 	 Receives MCU0 values
+T1 	        check_failsafe_task 	     Checks if the system must switch to Failsafe mode
+T2          check_mega128_values_task 	 Receives MCU0 values
+T3 	        send_data_to_autopilot_task  Send information to MCU0
 T4 	        servo_transmit               Transmits the Servos\u2019 commands
-T5 	        check_failsafe_task 	     Checks if the system must switch to Failsafe mode
+T5 	        test_ppm_task                Decodes the Radio-Command orders
 
     * Autopilot
 
 Identifier 	C Entry Point Function 	Description
-T6 	        radio_control_task 	    Manages the Radio orders
-T7 	        stabilisation_task 	    Ensure the airframe Stabilization
-T8 	        link_fbw_send 	        Sends the flight commands to MCU1
-T9 	        receive_gps_data_task 	Decodes the GPS Signals
-T10 	    navigation_task 	    Computes the next position of the airframe
-T11 	    altitude_control_task 	Controls the airframe altitude Control
-T12 	    climb_control_task 	    Controls the airframe Climb
-T13 	    reporting_task 	        Reports the flight information to the ground station
+T5 	        altitude_control_task 	Controls the airframe altitude Control
+T6 	        climb_control_task 	    Controls the airframe Climb
+T7 	        link_fbw_send 	        Sends the flight commands to MCU1
+T8 	        navigation_task 	    Computes the next position of the airframe
+T9 	        radio_control_task 	    Manages the Radio orders
+T10         receive_gps_data_task 	Decodes the GPS Signals
+T11         reporting_task 	        Reports the flight information to the ground station
+T12         stabilisation_task 	    Ensure the airframe Stabilization
 
 In addition, both applications uses several interruption routines listed in the following tables.
 
     * FBW
 
 Identifier 	C Entry Point Function 	Description
-I1 	        __vector_6 	            Servo interrupt
-I2 	        __vector_10 	        SPI interrupt
-I3 	        __vector_5 	            Radio interrupt
+I1 	        __vector_5 	            Radio interrupt
+I2 	        __vector_6 	            Servo interrupt
+I3 	        __vector_10 	        SPI interrupt
 
     * Autopilot
 
 Identifier 	C Entry Point Function 	     Description
-I4 	        __vector_17 and __vector_12	 SPI interrupt
-I5 	        __vector_5 	                 Modem interrupt
-I6 	        parse_ubx 	                 GPS interrupt
+I4 	        __vector_5 	                 Modem interrupt
+I5 	        __vector_12	                 SPI interrupt
+I6 	        __vector_17                  SPI interrupt
+I7 	        __vector_30                  GPS interrupt
 
 One may also consider calculating the WCET of these routines.
 
