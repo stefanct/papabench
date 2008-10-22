@@ -124,4 +124,5 @@ SIGNAL( SIG_ADC )
   ADMUX = adc_input | ANALOG_VREF;
   /* Restart the conversion */
   sbi( ADCSR, ADSC );
+  
 }

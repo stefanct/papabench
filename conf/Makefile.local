@@ -5,9 +5,9 @@
 #MACH	=
 
 # powerpc-elf-
-ARCH	= powerpc-elf-
-MACH	=
-STACK	= 0x80000000
+#ARCH	= powerpc-elf-
+#MACH	=
+#STACK	= 0x80000000
 
 
 # powerpc-linux-gnu
@@ -16,8 +16,8 @@ STACK	= 0x80000000
 
 
 # arm-elf-
-#ARCH	= arm-elf-
-#MACH	=
+ARCH	= arm-elf-
+MACH	=
 
 
 # Tools

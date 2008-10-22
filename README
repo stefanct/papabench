@@ -66,8 +66,8 @@ To Compile PapaBench
 
   3) "make" in top directory should compile everything
 
-The application
----------------
+Multi-processor application
+---------------------------
 
 In the default configuration, Papabench produces executable files representing two programs running on two processors. They may be found here:
   - Fly-By-Wire:	PAPABENCH/sw/airborne/fly_by_wire/fbw.elf
@@ -98,6 +98,37 @@ AUTOPILOT
   - __vector_12 (20Hz) -- interruption
   - __vector_17 (20Hz) -- interruption
   - __vector_30 (4Hz) -- interruption
-  
+
+Mono-processor application
+--------------------------
+
+To compile papabench to only one executable file for only one processor, just
+add the option PAPABENCH_SINGLE to the "make" command.
+	"make PAPABENCH_SINGLE=yes"
+
+We obtain now a lonely executable:
+  PAPABENCH/sw/airborne/autopilot/autopilot.elf
+
+The tasks becomes:
+  - altitude_control_task (4Hz)
+  - check_failsafe_task (20Hz)
+  - check_mega128_values_task (20Hz)
+  - climb_control_task (4Hz)
+  - link_fbw_send (20Hz)
+  - navigation_task (4Hz)
+  - radio_control_task (40Hz)
+  - receive_gps_data_task (4Hz)
+  - reporting_task (10Hz)
+  - send_data_to_autopilot_task (40Hz)
+  - servo_transmit (20Hz)
+  - stabilisation_task (20Hz)
+  - test_ppm_task (40Hz)
+  - __vector_5 (10Hz) -- interruption
+  - __vector_6 (20Hz) -- interruption (5 subsequent invocation each 2ms)
+  - __vector_10 (40Hz) -- interruption
+  - __vector_12 (20Hz) -- interruption
+  - __vector_17 (20Hz) -- interruption
+  - __vector_18 (40Hz) -- interruption (previously __vector_5 in fly-by-wire)
+  - __vector_30 (4Hz) -- interruption
 
 A more formal description of the tasks and their temporal properties expressed in AADL is given in directory "aadl_sources".

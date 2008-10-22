@@ -50,12 +50,12 @@ uint16_t		adc_samples[ NB_ADC ];
 
 static struct adc_buf* buffers[NB_ADC];
 
-void adc_buf_channel(uint8_t adc_channel, struct adc_buf* s) {
+void fbw_adc_buf_channel(uint8_t adc_channel, struct adc_buf* s) {
   buffers[adc_channel] = s;
 }
 
 void 
-adc_init( void )
+fbw_adc_init( void )
 {
   uint8_t i;
   /* Ensure that our port is for input with no pull-ups */
@@ -82,7 +82,6 @@ adc_init( void )
  * 
  *  8.913kHz on mega128@16MHz 1kHz/channel ??
 */
-
 
 SIGNAL( SIG_ADC )
 {

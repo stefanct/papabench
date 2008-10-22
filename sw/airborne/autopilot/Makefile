@@ -41,6 +41,16 @@ INCLUDES = -I $(FBW) -I ../../include -I $(VARINCLUDE)
 GPS = gps_ubx.c
 GPS_FLAGS=-DUBX
 
+ifdef PAPABENCH_SINGLE
+SINGLE_SOURCES = \
+	../fly_by_wire/adc_fbw.c \
+	../fly_by_wire/ppm.o \
+	../fly_by_wire/spi.o \
+	../fly_by_wire/main.o \
+	../fly_by_wire/servo.o \
+	../fly_by_wire/uart.o
+endif
+
 $(TARGET).srcs = \
 	$(ARCH_CRT0) \
 	main.c \
@@ -57,7 +67,8 @@ $(TARGET).srcs = \
 	if_calib.c \
 	mainloop.c \
 	../../lib/c/math.c \
-	$(ARCH_SOURCES)
+	$(ARCH_SOURCES) \
+	$(SINGLE_SOURCES)
 
 include $(BASE)/conf/Makefile.std
 

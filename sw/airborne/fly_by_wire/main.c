@@ -106,53 +106,72 @@ void send_data_to_autopilot_task(void)
    }
 }
 
-int main( void )
-{
+#ifdef PAPABENCH_SINGLE
+	extern uint8_t _1Hz;
+	extern uint8_t _20Hz;
+#else
+	static uint8_t _1Hz;
+	static uint8_t _20Hz;
+#endif
+
+void fbw_init(void) {
   uart_init_tx();
   uart_print_string("FBW Booting $Id$\n");
 
 #ifndef CTL_BRD_V1_1
-  adc_init();
-  adc_buf_channel(3, &vsupply_adc_buf);
-  adc_buf_channel(6, &vservos_adc_buf);
+  fbw_adc_init();
+  fbw_adc_buf_channel(3, &vsupply_adc_buf);
+  fbw_adc_buf_channel(6, &vservos_adc_buf);
 #endif
   timer_init();
   servo_init();
   ppm_init();
-  spi_init();
+  fbw_spi_init();
   //sei(); //FN
+}
+
+void fbw_schedule(void) {
+	if (time_since_last_mega128 < STALLED_TIME)
+		time_since_last_mega128++;
+	if (time_since_last_ppm < REALLY_STALLED_TIME)
+		time_since_last_ppm++;
+	if (_1Hz == 0)  {
+		last_ppm_cpt = ppm_cpt;
+		ppm_cpt = 0;
+	}
+	test_ppm_task(); 	
+	check_mega128_values_task();
+	send_data_to_autopilot_task();    
+	check_failsafe_task();
+	if (_20Hz >= 3) 
+		servo_transmit();
+}
+
+#ifndef PAPABENCH_SINGLE
+int main( void )
+{
+	fbw_init();
   while( 1 ) 
   {
-    test_ppm_task(); 	
-    check_mega128_values_task();
-    send_data_to_autopilot_task();    
-    check_failsafe_task();
+	fbw_schedule();
     if(timer_periodic()) 
     {
-      static uint8_t _1Hz;
-      static uint8_t _20Hz;
       _1Hz++;
       _20Hz++;
       if (_1Hz >= 60) 
       {
 	_1Hz = 0;
-	last_ppm_cpt = ppm_cpt;
-	ppm_cpt = 0;
       }
       if (_20Hz >= 3) 
       {
 	_20Hz = 0;
-	servo_transmit();
-	//	status_transmit();
       }
-      if (time_since_last_mega128 < STALLED_TIME)
-	time_since_last_mega128++;
-      if (time_since_last_ppm < REALLY_STALLED_TIME)
-	time_since_last_ppm++;
     }
   } 
   return 0;
 }
+#endif
+
 void test_ppm_task(void)
 {
     if( ppm_valid ) 

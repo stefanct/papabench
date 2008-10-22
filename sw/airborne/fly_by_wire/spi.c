@@ -56,7 +56,7 @@ void spi_reset(void) {
   mega128_receive_valid = FALSE;
 }
 
-void spi_init(void) {
+void fbw_spi_init(void) {
   to_mega128.status = 0;
   to_mega128.nb_err = 0;
 

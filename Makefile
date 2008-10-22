@@ -19,7 +19,7 @@
 # Boston, MA 02111-1307, USA.  
 
 PACKAGE=PapaBench
-VERSION=0.3
+VERSION=0.4
 RELEASE=0
 export BASE=$(PWD)
 DIST= \
@@ -44,7 +44,10 @@ LOGALIZER=sw/logalizer
 SIMULATOR=sw/simulator
 TOOLS=sw/tools
 MAKE=make
-
+ifdef PAPABENCH_SINGLE
+PAPABENCH_FLAGS=PAPABENCH_SINGLE=yes
+FBW_FLAGS=PAPABENCH_NOLINK=yes
+endif
 
 # Rules
 all : fbw ap 
@@ -56,10 +59,10 @@ lib:
 	cd $(LIB)/c; $(MAKE)
 
 fbw fly_by_wire : 
-	cd $(FBW); $(MAKE) all
+	cd $(FBW); $(MAKE) $(PAPABENCH_FLAGS) $(FBW_FLAGS) all
 
 ap autopilot : 
-	cd $(AP); $(MAKE) all
+	cd $(AP); $(MAKE) $(PAPABENCH_FLAGS) all
 
 upload_fbw: fbw
 	cd $(FBW); $(MAKE) upload

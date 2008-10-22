@@ -37,6 +37,10 @@
 #include "estimator.h"
 #include "downlink.h"
 
+#ifndef PAPABENCH_SINGLE
+	void fbw_init(void);
+	void fbw_schedule(void);
+#endif
 
 int main( void ) 
 {
@@ -54,6 +58,9 @@ int main( void )
   nav_init();
   ir_init();
   estimator_init();
+#	ifdef PAPABENCH_SINGLE
+		fbw_init();
+#	endif
 
   /* start interrupt task */
   //sei(); /*Fadia*/
@@ -67,8 +74,12 @@ int main( void )
 
   /*  enter mainloop */
   while( 1 ) {
-    if(timer_periodic())
+    if(timer_periodic()) {
       periodic_task();
+#		if PAPABENCH_SINGLE
+			fbw_schedule();
+#		endif
+	}
     if (gps_msg_received) 
     {
 	/*receive_gps_data_task()*/

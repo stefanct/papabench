@@ -58,7 +58,11 @@ volatile bool_t ppm_valid;
   
 #define RestartPpmCycle() { state = 0;  sync_start = TCNT2; return; }
 
-SIGNAL( SIG_INPUT_CAPTURE1 )
+#ifdef PAPABENCH_SINGLE
+	SIGNAL(SIG_SPM_READY)
+#else
+	SIGNAL( SIG_INPUT_CAPTURE1 )
+#endif
 {
   static uint16_t		last;
   uint16_t		this;

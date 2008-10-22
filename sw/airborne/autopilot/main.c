@@ -459,11 +459,17 @@ void climb_control_task(void)
  *   - do navigation with \a navigation_task
  *
  */
+
+#ifdef PAPABENCH_SINGLE
+	uint8_t _20Hz   = 0;
+	uint8_t _1Hz   = 0;
+#else
+	static uint8_t _20Hz   = 0;
+	static uint8_t _1Hz   = 0;
+#endif
 void periodic_task( void ) {
-  static uint8_t _20Hz   = 0;
   static uint8_t _10Hz   = 0;
   static uint8_t _4Hz   = 0;
-  static uint8_t _1Hz   = 0;
   static uint8_t t = 0;
 
   estimator_t += PERIOD;
