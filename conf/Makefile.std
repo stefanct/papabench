@@ -37,7 +37,7 @@ USB_PROG_PORT = /dev/ttyUSB1
 
 # Architecture dependent
 include $(BASE)/conf/Makefile.local
--include $(BASE)/conf/$(ARCH)$(MACH)conf
+-include $(BASE)/conf/$(CONF).conf
 
 SERIAL_FLAGS =	\
 	-dprog=avr910 \

@@ -1,24 +1,12 @@
 # Architecture selection
-#	One of powerpc-elf-, powerpc-linux-gnu, arm-elf-
 #	Uncomment the line matching your architecture and your machine
-#ARCH	=
-#MACH	=
+#	Targets marked -alone- does not embed the CRT0 and minimal libc
+#	and the matching .conf file may be tuned.
 
-# powerpc-elf-
-#ARCH	= powerpc-elf-
-#MACH	=
-#STACK	= 0x80000000
-
-
-# powerpc-linux-gnu
-#ARCH	= powerpc-linux-gnu-
-#MAC	=
-
-
-# arm-elf-
-ARCH	= arm-elf-
-MACH	=
-
+#CONF=powerpc-elf-alone
+#CONF=powerpc-linux-gnu
+#CONF=arm-elf
+CONF=arm-elf-alone
 
 # Tools
 CC		= $(ARCH)gcc

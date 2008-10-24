@@ -72,37 +72,20 @@ double pp_sin(double x)
 	return(sign < 0? -y : y);
 }
 
-double pp_sqrt(double x)
+#define SQRT_PRECISION 5
+double pp_sqrt(double n)
 {
-	typedef union {
-		double d;
-		unsigned u[4];
-	} DBL;
-	double re, p, q;
-	unsigned ex; /*exponens*/
-	DBL *xp;
-	xp = (DBL*)&x;
-	ex = xp->u[3] & ~0100017; /*save exponens*/
-	re = ex & 020 ? 1.414235623730950488 : 1.0;
-	ex = (ex - 037740) >> 1;
-	ex &= ~0100017;
-	xp->u[3] &= ~0177760; /*erase exponens and sign*/
-	xp->u[3] |= 037740; /*arrange for mantissa in range 0.5 to 1.0*/
-	if (xp->d < 0.7071067812) {  /* multiply by sqrt(2) if mantissa < 0.7 */
-		xp->d *= 1.4142135623730950488;
-		if (re > 1.0) re = 1.189207115002721;
-		else re = 1.0 / 1.18920711500271;
-	}
-	p =	      0.54525387389085 +   /* Polynomial approximation */
-	    xp->d * (13.65944682358639 +   /* from: COMPUTER APPROXIMATIONS*/
-	    xp->d * (27.090122712655   +   /* Hart, J.F. et al. 1968 */
-	    xp->d *   6.43107724139784));
-	q =	      4.17003771413707 +
-	    xp->d * (24.84175210765124 +
-	    xp->d * (17.71411083016702 +
-	    xp->d ));
-	xp->d = p / q;
-	xp->u[3] = xp->u[3] + (ex & ~0100000);
-	xp->d *= re;
-	return(xp->d);
+#if 0
+	float x, m;
+	int i, e;
+	
+	/* compute the approximation */
+	m = frexpf(n, &e);
+	x = ldexp(m, e/2);
+	
+	/* perform the computation */
+	for(i = 0; i < SQRT_PRECISION; i++)
+		x = (x + n / x) / 2;
+	return x;
+#endif
 }
