@@ -1,12 +1,17 @@
 # Architecture selection
+#
 #	Uncomment the line matching your architecture and your machine
 #	Targets marked -alone- does not embed the CRT0 and minimal libc
 #	and the matching .conf file may be tuned.
+#
+#	If CONF is empty (default case), native architecture will ne
+#	used.
 
 #CONF=powerpc-elf-alone
 #CONF=powerpc-linux-gnu
 #CONF=arm-elf
-CONF=arm-elf-alone
+#CONF=arm-elf-alone
+CONF=
 
 # Tools
 CC		= $(ARCH)gcc
