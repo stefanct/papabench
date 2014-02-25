@@ -301,28 +301,36 @@ void send_attitude(void){ //500ms
 }
   
 void send_adc(void){  //500ms
-  if(!boot){ if (count % 5 == 1) PERIODIC_SEND_ADC();}
+  if(!boot){ if (count % 5 == 1)
+	  PERIODIC_SEND_ADC();}
 }
 void send_settings(void){ //500ms
-  if(!boot){if (count % 5 == 2) PERIODIC_SEND_SETTINGS();}
+  if(!boot){if (count % 5 == 2)
+	  PERIODIC_SEND_SETTINGS();}
 }
 void send_desired(void){  //1000ms
-  if(!boot){ if (count % 10 == 3) PERIODIC_SEND_DESIRED();}
+  if(!boot){ if (count % 10 == 3)
+	  PERIODIC_SEND_DESIRED();}
 }
 void send_bat(void){  //2000ms
-  if(!boot){ if (count % 20 == 8) PERIODIC_SEND_BAT();}
+  if(!boot){ if (count % 20 == 8)
+	  PERIODIC_SEND_BAT();}
 }
 void send_climb(void){  //2000ms
-  if(!boot){ if (count % 20 == 18) PERIODIC_SEND_CLIMB_PID();}
+  if(!boot){ if (count % 20 == 18)
+	  PERIODIC_SEND_CLIMB_PID();}
 }
 void send_mode(void){  //5000ms
-  if(!boot){ if (count % 50 == 9) PERIODIC_SEND_PPRZ_MODE();}
+  if(!boot){ if (count % 50 == 9)
+	  PERIODIC_SEND_PPRZ_MODE();}
 }
 void send_debug(void){  //5000ms
-  if(!boot){ if (count % 50 == 29) PERIODIC_SEND_DEBUG();}
+  if(!boot){ if (count % 50 == 29)
+	  PERIODIC_SEND_DEBUG();}
 }
 void send_nav_ref(void){  //10000ms
-  if(!boot){ if (count % 100 == 49) PERIODIC_SEND_NAVIGATION_REF();}
+  if(!boot){ if (count % 100 == 49)
+	  PERIODIC_SEND_NAVIGATION_REF();}
 }
 
 /** \fn inline uint8_t inflight_calib_mode_update ( void )
@@ -441,6 +449,12 @@ void climb_control_task(void)
 /** Maximum time allowed for low battery level */
 #define LOW_BATTERY_DELAY 5
 
+void navigation_task(void) {
+    navigation_update();
+    send_nav_values();
+    course_run();
+}
+
 /** \fn inline void periodic_task( void )
  *  \brief Do periodic tasks at 61 Hz
  */
@@ -527,11 +541,7 @@ void periodic_task( void ) {
 if (_4Hz == 0)
 {
     estimator_propagate_state();
-    /*navigation_task */
-    navigation_update();
-    send_nav_values();
-    course_run();
-    /*end navigation*/
+    navigation_task();
     altitude_control_task();
     climb_control_task();
 }

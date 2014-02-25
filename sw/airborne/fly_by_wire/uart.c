@@ -76,7 +76,7 @@ void uart_transmit( unsigned char data ) {
 }
 
 void uart_print_hex ( uint8_t c ) {
-  const uint8_t hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', 
+  static const uint8_t hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7',
                             '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
   uint8_t high = (c & 0xF0)>>4;
   uint8_t low  = c & 0x0F;

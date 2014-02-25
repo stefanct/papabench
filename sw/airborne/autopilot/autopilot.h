@@ -105,7 +105,7 @@ extern bool_t launch;
   return FALSE; \
 }
 
-#define CheckEvent(_event) (_event ? _event = FALSE, TRUE : FALSE)
+#define CheckEvent(_event) (_event ? (_event = FALSE, TRUE) : FALSE)
 
 #ifdef CTL_BRD_V1_1
 extern struct adc_buf buf_bat;

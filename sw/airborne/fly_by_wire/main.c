@@ -212,19 +212,16 @@ void check_failsafe_task(void)
       servo_set(failsafe);
     }
 }
-void check_mega128_values_task(void)
-{
-     if ( !SpiIsSelected() && spi_was_interrupted ) 
-     {
-      if (mega128_receive_valid)
-      { 
-	time_since_last_mega128 = 0;
-	mega128_ok = TRUE;
-	if (mode == MODE_AUTO)
-	  servo_set(from_mega128.channels);
-      }
-     }
-    if (time_since_last_mega128 == STALLED_TIME) {
-      mega128_ok = FALSE;
+void check_mega128_values_task(void) {
+	if(!SpiIsSelected() && spi_was_interrupted)  {
+		if (mega128_receive_valid) { 
+			time_since_last_mega128 = 0;
+			mega128_ok = TRUE;
+			if(mode == MODE_AUTO)
+				servo_set(from_mega128.channels);
+		}
+	}
+	if(time_since_last_mega128 == STALLED_TIME) {
+		mega128_ok = FALSE;
     }
 }

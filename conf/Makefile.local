@@ -11,7 +11,7 @@
 #CONF=powerpc-linux-gnu
 #CONF=arm-elf
 #CONF=arm-elf-alone
-CONF=
+CONF=arm-lpc2138-ram
 
 # Tools
 CC		= $(ARCH)gcc
@@ -22,6 +22,6 @@ OBJDUMP = $(ARCH)objdump -d
 
 
 # Other configuration
-USER_CFLAGS		=
+USER_CFLAGS		= -g3
 USER_LDFLAGS	=
 

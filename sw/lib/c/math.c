@@ -72,20 +72,25 @@ double pp_sin(double x)
 	return(sign < 0? -y : y);
 }
 
-#define SQRT_PRECISION 5
-double pp_sqrt(double n)
-{
-#if 0
-	float x, m;
-	int i, e;
-	
-	/* compute the approximation */
-	m = frexpf(n, &e);
-	x = ldexp(m, e/2);
-	
-	/* perform the computation */
-	for(i = 0; i < SQRT_PRECISION; i++)
-		x = (x + n / x) / 2;
-	return x;
-#endif
+
+/**
+ * RT-friendly version of sqrt (from http://www.azillionmonkeys.com/qed/sqroot.html).
+ * Only work with IEEE-754 floating-point.
+ */
+double pp_sqrt(double y) {
+    double x, z, tempf;
+    unsigned long *tfptr = ((unsigned long *)&tempf) + 1;
+
+	tempf = y;
+	*tfptr = (0xbfcdd90a - *tfptr) >> 1;	/* estimate of 1/sqrt(y) */
+	x =  tempf;
+	z =  y * 0.5;							/* hoist out the “/2”    */
+	x = (1.5 * x) - (x * x) * (x * z);		/* iteration formula     */
+	x = (1.5 * x) - (x * x) * (x * z);
+	x = (1.5 * x) - (x * x) * (x * z);
+	x = (1.5 * x) - (x * x) * (x * z);
+	x = (1.5 * x) - (x * x) * (x * z);
+	return x * y;
 }
+
+
