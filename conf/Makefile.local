@@ -7,11 +7,12 @@
 #	If CONF is empty (default case), native architecture will ne
 #	used.
 
-#CONF=powerpc-elf-alone
-#CONF=powerpc-linux-gnu
 #CONF=arm-elf
 #CONF=arm-elf-alone
-CONF=arm-lpc2138-ram
+#CONF=arm-linux-gnueabi-alone
+#CONF=powerpc-elf-alone
+#CONF=powerpc-linux-gnu
+CONF=powerpc-linux-gnu-alone
 
 # Tools
 CC		= $(ARCH)gcc
@@ -24,4 +25,3 @@ OBJDUMP = $(ARCH)objdump -d
 # Other configuration
 USER_CFLAGS		= -g3
 USER_LDFLAGS	=
-
