@@ -12,7 +12,8 @@
 #CONF=arm-linux-gnueabi-alone
 #CONF=powerpc-elf-alone
 #CONF=powerpc-linux-gnu
-CONF=powerpc-linux-gnu-alone
+#CONF=powerpc-linux-gnu-alone
+CONF=native
 
 # Tools
 CC		= $(ARCH)gcc
