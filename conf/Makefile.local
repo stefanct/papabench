@@ -19,8 +19,8 @@ CONF=native
 
 # Tools
 ARCH	= $(CONF)
-CC	= $(ARCH)gcc
-LD	= $(CC) 
+CC		= $(ARCH)gcc
+LD		= $(CC) 
 SIZE	= $(ARCH)size
 OBJCOPY	= $(ARCH)objcopy
 OBJDUMP = $(ARCH)objdump -d

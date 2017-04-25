@@ -119,7 +119,6 @@ The tasks becomes:
   - radio_control_task (40Hz)
   - receive_gps_data_task (4Hz)
   - reporting_task (10Hz)
-  - send_data_to_autopilot_task (40Hz)
   - servo_transmit (20Hz)
   - stabilisation_task (20Hz)
   - test_ppm_task (40Hz)

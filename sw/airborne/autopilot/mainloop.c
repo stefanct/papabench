@@ -42,6 +42,13 @@
 	void fbw_schedule(void);
 #endif
 
+void receive_gps_data_task(void) {
+	parse_gps_msg();
+	send_gps_pos();
+	send_radIR();
+	send_takeOff();
+}
+
 int main( void ) 
 {
   uint8_t init_cpt;
@@ -81,13 +88,7 @@ int main( void )
 #		endif
 	}
     if (gps_msg_received) 
-    {
-	/*receive_gps_data_task()*/
-	parse_gps_msg();
-	send_gps_pos();
-        send_radIR();
-        send_takeOff();
-    }
+		receive_gps_data_task();
     if (link_fbw_receive_complete) {
       link_fbw_receive_complete = FALSE;
       radio_control_task();

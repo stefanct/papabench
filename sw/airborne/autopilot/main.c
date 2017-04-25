@@ -137,6 +137,19 @@ else {}
 //#endif
 }
 
+void reporting_task(void) {
+	send_boot();
+	send_attitude();
+   	send_adc();  
+	send_settings();
+	send_desired();
+	send_bat();
+	send_climb();
+	send_mode();
+	send_debug();
+	send_nav_ref();
+}
+
 
 /** \fn inline uint8_t pprz_mode_update( void )
  *  \brief Update paparazzi mode
@@ -554,8 +567,8 @@ else if (_20Hz == 1)
     odd++;
     if (odd & 0x01)
     {
-	/*reporting_task()*/
-	send_boot();
+	reporting_task();
+	/* send_boot();
 	send_attitude();
    	send_adc();  
 	send_settings();
@@ -564,7 +577,7 @@ else if (_20Hz == 1)
 	send_climb();
 	send_mode();
 	send_debug();
-	send_nav_ref();
+	send_nav_ref(); */
     }
 }
 else if(_20Hz == 2)
