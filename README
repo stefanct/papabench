@@ -60,7 +60,7 @@ To Compile PapaBench
   1) Extract the archive
 
   2) HAVE A LOOK at conf/Makefile.local
-    - select or configure the ARCH (architecture) and MACH (machine) variables in "conf/Makefile.local",
+    - to select the cross-compiler, ever select one CONF and write your own ARCH prefix in "conf/Makefile.local",
     - configure your compiler tools,
     - configure your CFLAGS and LDFLAGS variable for compilation and linkage options. 
 

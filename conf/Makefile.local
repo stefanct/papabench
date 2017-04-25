@@ -7,17 +7,20 @@
 #	If CONF is empty (default case), native architecture will ne
 #	used.
 
+# Uncomment one of the following lines
+ARCH=arm-linux-gnueabi-
 #CONF=arm-elf
 #CONF=arm-elf-alone
 #CONF=arm-linux-gnueabi-alone
 #CONF=powerpc-elf-alone
 #CONF=powerpc-linux-gnu
 #CONF=powerpc-linux-gnu-alone
-CONF=native
+#CONF=native
 
 # Tools
-CC		= $(ARCH)gcc
-LD		= $(CC) 
+ARCH	= $(CONF)
+CC	= $(ARCH)gcc
+LD	= $(CC) 
 SIZE	= $(ARCH)size
 OBJCOPY	= $(ARCH)objcopy
 OBJDUMP = $(ARCH)objdump -d
