@@ -8,14 +8,14 @@
 #	used.
 
 # Uncomment one of the following lines
-ARCH=arm-linux-gnueabi-
+#ARCH=
 #CONF=arm-elf
 #CONF=arm-elf-alone
 #CONF=arm-linux-gnueabi-alone
 #CONF=powerpc-elf-alone
 #CONF=powerpc-linux-gnu
 #CONF=powerpc-linux-gnu-alone
-#CONF=native
+CONF=native
 
 # Tools
 ARCH	= $(CONF)
